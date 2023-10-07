@@ -6,7 +6,7 @@ All validation rules description is in progress, but you can find them [here](/f
 ## Installation
 
 ```bash
-pip inslall git+https://github.com/mytestopia/flake8-vedro@v1.0.0
+pip install flake8-vedro
 ```
 
 ## Configuration
