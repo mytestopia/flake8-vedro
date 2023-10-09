@@ -15,7 +15,7 @@ def find_dev_required():
 
 setup(
     name="flake8-vedro",
-    version="1.0.1",
+    version="1.0.0",
     description="flake8 based linter for vedro framework",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

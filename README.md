@@ -1,7 +1,7 @@
 # flake8-vedro
 Flake8 based linter for [Vedro](https://vedro.io/) framework
 
-All validation rules description is in progress, but you can find them [here](/flake8_vedro/errors/errors.py).
+All validation rules description is in progress, but you can find them [here](https://github.com/mytestopia/flake8-vedro/blob/version-1.0.0/flake8_vedro/errors/errors.py).
 
 ## Installation
 
