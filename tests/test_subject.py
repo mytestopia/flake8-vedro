@@ -39,6 +39,7 @@ def test_vedro_scenario_empty_subject():
 def test_vedro_scenario_no_subject():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(SingleSubjectChecker)
+    ScenarioVisitor.register_scenario_checker(SubjectEmptyChecker)
     code = """
         class Scenario:
             def when(): pass
