@@ -119,3 +119,8 @@ class ScopeVarIsRedefined(Error):
 class ScopeVarIsPartiallyRedefined(Error):
     code = 'VDR312'
     message = 'scope variable "{name}" is partially redefined'
+
+
+class ContextWithoutAssert(Error):
+    code = 'VDR313'
+    message = 'context does not have an assert'

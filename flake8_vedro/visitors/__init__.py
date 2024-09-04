@@ -11,6 +11,7 @@ from .scenario_checkers import (
 from .scenario_visitor import Context, ScenarioVisitor
 from .steps_checkers import (
     AssertChecker,
+    ContextAssertChecker,
     InterfacesUsageChecker,
     NameChecker,
     NoAssertChecker,
