@@ -8,7 +8,7 @@ def test_context_without_assert():
     ScenarioVisitor.register_steps_checker(ContextAssertChecker)
     code = """
     @vedro.context:
-    async def(): pass
+    def(): pass
     """
     assert_error(ScenarioVisitor, code, ContextAssertChecker)
 
@@ -18,8 +18,8 @@ def test_context_without_assert_in_with():
     ScenarioVisitor.register_steps_checker(ContextAssertChecker)
     code = """
     @vedro.context:
-    async def():
-        with foo:
+    def():
+        with ():
             pass
     """
     assert_error(ScenarioVisitor, code, ContextAssertChecker)
@@ -30,7 +30,7 @@ def test_context_assert():
     ScenarioVisitor.register_steps_checker(ContextAssertChecker)
     code = """
     @vedro.context:
-    async def(): assert await page.is_visible()
+    def(): assert page.is_visible()
     """
     assert_not_error(ScenarioVisitor, code)
 
@@ -40,8 +40,8 @@ def test_context_assert_in_with():
     ScenarioVisitor.register_steps_checker(ContextAssertChecker)
     code = """
     @vedro.context:
-    async def():
-        with foo:
-            assert await page.is_visible()
+    def():
+        with ():
+            assert page.is_visible()
     """
     assert_not_error(ScenarioVisitor, code)
