@@ -1,5 +1,4 @@
 from .assert_checker import AssertChecker
-from .context_assert_checker import ContextAssertChecker
 from .interfaces_checker import InterfacesUsageChecker
 from .name_checker import NameChecker
 from .no_assert_checker import NoAssertChecker

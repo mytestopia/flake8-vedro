@@ -23,6 +23,7 @@ Some rules in linter should be configurated:
 [flake8]
 scenario_params_max_count = 8  # VDR109
 allowed_to_redefine_list = page,page2  # VDR311
+is_context_assert_optional = false       # VDR313
 ```
 
 ## Rules
