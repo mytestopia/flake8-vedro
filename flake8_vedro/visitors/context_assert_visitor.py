@@ -1,45 +1,64 @@
 import ast
-from typing import Union, List
+from typing import Union, Optional, List, Type
+from flake8_vedro.abstract_checkers import (
+    ContextChecker
+)
 from flake8_plugin_utils import Error
 from flake8_vedro.errors import ContextWithoutAssert
 from flake8_vedro.config import Config
 from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
 
 
+class Context:
+    def __init__(self, scenario_node: Union[ast.FunctionDef, ast.AsyncFunctionDef], filename: str):
+        self.scenario_node = scenario_node
+        self.filename = filename
+
+
 class ContextAssertVisitor(VisitorWithFilename):
+    context_checkers: List[ContextChecker] = []
+
+    def __init__(self, config: Optional[Config] = None,
+                 filename: Optional[str] = None) -> None:
+        super().__init__(config, filename)
 
     @property
     def config(self):
         return self._config
 
-    def check_assert_in_contexts(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef], config: Config) -> List[
-            Error]:
-        if config.is_context_assert_optional:
-            return []
-        else:
-            for decorator in node.decorator_list:
-                if (isinstance(decorator, ast.Attribute)
-                        and decorator.value.id == 'vedro'
-                        and decorator.attr == 'context'):
-                    has_assert = False
+    @classmethod
+    def register_context_checker(cls, checker: Type[ContextChecker]):
+        cls.context_checkers.append(checker())
+        return checker
 
-                    for line in node.body:
-                        if isinstance(line, ast.Assert):
-                            has_assert = True
-                            break
+    @classmethod
+    def deregister_all(cls):
+        cls.context_checkers = []
 
-                        elif isinstance(line, ast.With):
-                            for line_body in line.body:
-                                if isinstance(line_body, ast.Assert):
-                                    has_assert = True
-                                    break
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> List[Error]:
+        for decorator in node.decorator_list:
+            if (isinstance(decorator, ast.Attribute)
+                    and decorator.value.id == 'vedro'
+                    and decorator.attr == 'context'):
+                context = Context(scenario_node=node,
+                                  filename=self.filename)
+                try:
+                    for checker in self.context_checkers:
+                        self.errors.extend(checker.check_context(context, self.config))
+                except Exception as e:
+                    print(f'Linter failed: checking {context.filename} with {checker.__class__}.\n'
+                          f'Exception: {e}')
 
-                    if not has_assert:
-                        self.error_from_node(ContextWithoutAssert, node,
-                                             func_name=node.name)
-
-    def visit_FunctionDef(self, node: ast.FunctionDef):
-        self.check_assert_in_contexts(node, self.config)
-
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef):
-        self.check_assert_in_contexts(node, self.config)
+    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> List[Error]:
+        for decorator in node.decorator_list:
+            if (isinstance(decorator, ast.Attribute)
+                    and decorator.value.id == 'vedro'
+                    and decorator.attr == 'context'):
+                context = Context(scenario_node=node,
+                                  filename=self.filename)
+                try:
+                    for checker in self.context_checkers:
+                        self.errors.extend(checker.check_context(context, self.config))
+                except Exception as e:
+                    print(f'Linter failed: checking {context.filename} with {checker.__class__}.\n'
+                          f'Exception: {e}')

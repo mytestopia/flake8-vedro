@@ -2,9 +2,12 @@ from flake8_plugin_utils import assert_error, assert_not_error
 from flake8_vedro.visitors.context_assert_visitor import ContextAssertVisitor
 from flake8_vedro.errors.errors import ContextWithoutAssert
 from flake8_vedro.config import DefaultConfig
+from flake8_vedro.visitors.context_checkers import ContextAssertChecker
 
 
 def test_function_def_without_assert():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f(): pass
@@ -14,6 +17,8 @@ def test_function_def_without_assert():
 
 
 def test_function_def_without_assert_when_optional():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f(): pass
@@ -23,6 +28,8 @@ def test_function_def_without_assert_when_optional():
 
 
 def test_function_def_without_assert_in_with():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f():
@@ -34,6 +41,8 @@ def test_function_def_without_assert_in_with():
 
 
 def test_function_def_assert():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f(): assert page.is_visible()
@@ -42,6 +51,8 @@ def test_function_def_assert():
 
 
 def test_function_def_assert_in_with():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f():
@@ -52,6 +63,8 @@ def test_function_def_assert_in_with():
 
 
 def test_async_function_def_without_assert():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f(): pass
@@ -61,6 +74,8 @@ def test_async_function_def_without_assert():
 
 
 def test_async_function_def_without_assert_in_with():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f():
@@ -72,6 +87,8 @@ def test_async_function_def_without_assert_in_with():
 
 
 def test_async_function_def_assert():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f(): assert page.is_visible()
@@ -80,6 +97,8 @@ def test_async_function_def_assert():
 
 
 def test_async_function_def_assert_in_with():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f():
@@ -90,6 +109,8 @@ def test_async_function_def_assert_in_with():
 
 
 def test_async_function_def_without_assert_when_optional():
+    ContextAssertVisitor.deregister_all()
+    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f(): pass
