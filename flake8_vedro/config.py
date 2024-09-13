@@ -13,7 +13,7 @@ class Config:
 
 class DefaultConfig(Config):
     def __init__(self,
-                 is_context_assert_optional: bool = True,
+                 is_context_assert_optional: bool = False,
                  max_params_count: int = 1,
                  allowed_to_redefine_list: Optional[List] = None
                  ):
