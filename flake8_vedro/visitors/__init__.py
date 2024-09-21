@@ -9,6 +9,7 @@ from .scenario_checkers import (
     VedroOnlyChecker
 )
 from .scenario_visitor import Context, ScenarioVisitor
+from .context_assert_visitor import Context, ContextAssertVisitor
 from .steps_checkers import (
     AssertChecker,
     InterfacesUsageChecker,

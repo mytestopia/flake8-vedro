@@ -12,22 +12,29 @@ from flake8_vedro.visitors.context_assert_visitor import Context, ContextAssertV
 class ContextAssertChecker(ContextChecker):
 
     def check_context(self, context: Context, config) -> List[Error]:
+        # if config.is_context_assert_optional:
+        #     return errors
         errors = []
-        if config.is_context_assert_optional:
-            return errors
-        else:
-            has_assert = False
-            for line in context.scenario_node.body:
-                if isinstance(line, ast.Assert):
-                    has_assert = True
-                    break
+        # for step in context.steps:
 
-                elif isinstance(line, ast.With):
-                    for line_body in line.body:
-                        if isinstance(line_body, ast.Assert):
+        for step in context.scenario_node:
+            for decorator in step.decorator_list:
+                if (isinstance(decorator, ast.Attribute)
+                        and decorator.value.id == 'vedro'
+                        and decorator.attr == 'context'):
+                    has_assert = False
+                    for line in step.body:
+                        if isinstance(line, ast.Assert):
                             has_assert = True
                             break
 
-            if not has_assert:
-                errors.append(ContextWithoutAssert(line.lineno, line.col_offset))
+        # elif isinstance(line, ast.With):
+        #     for line_body in line.body:
+        #         if isinstance(line_body, ast.Assert):
+        #             has_assert = True
+        #             break
+
+                    if not has_assert:
+                        errors.append(ContextWithoutAssert(step.lineno, step.col_offset))
+
         return errors

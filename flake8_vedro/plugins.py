@@ -5,7 +5,7 @@ from typing import Callable, List, Optional
 from flake8.options.manager import OptionManager
 from flake8_plugin_utils import Plugin, Visitor
 
-from flake8_vedro.visitors import ScenarioVisitor
+from flake8_vedro.visitors import ScenarioVisitor, ContextAssertVisitor
 
 from .config import Config
 from .defaults import Defaults
@@ -39,6 +39,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
     version = '1.0.1'
     visitors = [
         ScenarioVisitor,
+        ContextAssertVisitor
     ]
 
     def __init__(self, tree: ast.AST, filename: str, *args, **kwargs):
@@ -46,6 +47,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
 
     @classmethod
     def add_options(cls, option_manager: OptionManager):
+        option_manager.add_option(
+            '--is-context-assert-optional',
+            type=str,
+            default='false',
+            parse_from_config=True,
+            help='If allure labels decorator is required for every test',
+        )
         option_manager.add_option(
             '--scenario-params-max-count',
             default=Defaults.MAX_PARAMS_COUNT,
