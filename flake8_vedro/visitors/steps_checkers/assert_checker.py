@@ -12,45 +12,26 @@ from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 class AssertChecker(StepsChecker):
 
     def check_steps(self, context: Context, config) -> List[Error]:
-        # errors = []
-        # for step in context.steps:
-        #     if (
-        #         step.name.startswith('then')
-        #         or step.name.startswith('and')
-        #         or step.name.startswith('but')
-        #     ):
-        #         has_assert = False
-        #
-        #         for line in step.body:
-        #             if isinstance(line, ast.Assert):
-        #                 has_assert = True
-        #                 break
-        #
-        #             elif isinstance(line, ast.For) or isinstance(line, ast.While):
-        #                 for line_body in line.body:
-        #                     if isinstance(line_body, ast.Assert):
-        #                         has_assert = True
-        #                         break
-        #
-        #         if not has_assert:
-        #             errors.append(StepAssertWithoutAssert(step.lineno, step.col_offset, step_name=step.name))
-        # return errors
-        # if config.is_context_assert_optional:
-        #     return errors
         errors = []
         for step in context.steps:
-            for decorator in step.decorator_list:
-                if (isinstance(decorator, ast.Attribute)
-                        and decorator.value.id == 'vedro'
-                        and decorator.attr == 'context'):
-                    has_assert = False
+            if (
+                step.name.startswith('then')
+                or step.name.startswith('and')
+                or step.name.startswith('but')
+            ):
+                has_assert = False
 
-                    for line in step.body:
-                        if isinstance(line, ast.Assert):
-                            has_assert = True
-                            break
+                for line in step.body:
+                    if isinstance(line, ast.Assert):
+                        has_assert = True
+                        break
 
-                    if not has_assert:
-                        errors.append(ContextWithoutAssert(step.lineno, step.col_offset))
+                    elif isinstance(line, ast.For) or isinstance(line, ast.While):
+                        for line_body in line.body:
+                            if isinstance(line_body, ast.Assert):
+                                has_assert = True
+                                break
 
+                if not has_assert:
+                    errors.append(StepAssertWithoutAssert(step.lineno, step.col_offset, step_name=step.name))
         return errors
