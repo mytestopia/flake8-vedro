@@ -11,8 +11,8 @@ from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
 
 
 class Context:
-    def __init__(self, scenario_node: Union[ast.FunctionDef, ast.AsyncFunctionDef], filename: str):
-        self.scenario_node = scenario_node
+    def __init__(self, context_node: List[StepType], filename: str):
+        self.context_node = context_node
         self.filename = filename
 
 
@@ -37,21 +37,29 @@ class ContextAssertVisitor(VisitorWithFilename):
         cls.context_checkers = []
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> List[Error]:
-        context = Context(scenario_node=node,
-                          filename=self.filename)
-        try:
-            for checker in self.context_checkers:
-                self.errors.extend(checker.check_context(context, self.config))
-        except Exception as e:
-            print(f'Linter failed: checking {context.filename} with {checker.__class__}.\n'
-                  f'Exception: {e}')
+        for decorator in node.decorator_list:
+            if (isinstance(decorator, ast.Attribute)
+                    and decorator.value.id == 'vedro'
+                    and decorator.attr == 'context'):
+                context = Context(context_node=node,
+                                  filename=self.filename)
+                try:
+                    for checker in self.context_checkers:
+                        self.errors.extend(checker.check_context(context, self.config))
+                except Exception as e:
+                    print(f'Linter failed: checking {context.filename} with {checker.__class__}.\n'
+                          f'Exception: {e}')
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> List[Error]:
-        context = Context(scenario_node=node,
-                          filename=self.filename)
-        try:
-            for checker in self.context_checkers:
-                self.errors.extend(checker.check_context(context, self.config))
-        except Exception as e:
-            print(f'Linter failed: checking {context.filename} with {checker.__class__}.\n'
-                  f'Exception: {e}')
+        for decorator in node.decorator_list:
+            if (isinstance(decorator, ast.Attribute)
+                    and decorator.value.id == 'vedro'
+                    and decorator.attr == 'context'):
+                context = Context(context_node=node,
+                                  filename=self.filename)
+                try:
+                    for checker in self.context_checkers:
+                        self.errors.extend(checker.check_context(context, self.config))
+                except Exception as e:
+                    print(f'Linter failed: checking {context.filename} with {checker.__class__}.\n'
+                          f'Exception: {e}')

@@ -12,19 +12,7 @@ def test_function_def_without_assert():
     @vedro.context
     def f(): pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
-                 config=DefaultConfig(is_context_assert_optional=False))
-
-
-def test_function_def_without_assert_when_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
-    code = """
-    @vedro.context
-    def f(): pass
-    """
-    assert_not_error(ContextAssertVisitor, code,
-                     config=DefaultConfig(is_context_assert_optional=True))
+    assert_error(ContextAssertVisitor, code, ContextWithoutAssert)
 
 
 def test_function_def_without_assert_in_with():
@@ -36,8 +24,7 @@ def test_function_def_without_assert_in_with():
         with ():
             pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
-                 config=DefaultConfig(is_context_assert_optional=False))
+    assert_error(ContextAssertVisitor, code, ContextWithoutAssert)
 
 
 def test_function_def_assert():
@@ -47,7 +34,7 @@ def test_function_def_assert():
     @vedro.context
     def f(): assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextAssertVisitor, code)
 
 
 def test_function_def_assert_in_with():
@@ -59,7 +46,7 @@ def test_function_def_assert_in_with():
         with ():
             assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextAssertVisitor, code)
 
 
 def test_async_function_def_without_assert():
@@ -69,8 +56,7 @@ def test_async_function_def_without_assert():
     @vedro.context
     async def f(): pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
-                 config=DefaultConfig(is_context_assert_optional=False))
+    assert_error(ContextAssertVisitor, code, ContextWithoutAssert)
 
 
 def test_async_function_def_without_assert_in_with():
@@ -82,8 +68,7 @@ def test_async_function_def_without_assert_in_with():
         with ():
             pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
-                 config=DefaultConfig(is_context_assert_optional=False))
+    assert_error(ContextAssertVisitor, code, ContextWithoutAssert)
 
 
 def test_async_function_def_assert():
@@ -93,7 +78,7 @@ def test_async_function_def_assert():
     @vedro.context
     async def f(): assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextAssertVisitor, code)
 
 
 def test_async_function_def_assert_in_with():
@@ -105,14 +90,4 @@ def test_async_function_def_assert_in_with():
         with ():
             assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
-
-
-def test_async_function_def_without_assert_when_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
-    code = """
-    @vedro.context
-    async def f(): pass
-    """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=True))
+    assert_not_error(ContextAssertVisitor, code)
