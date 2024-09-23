@@ -48,13 +48,6 @@ class VedroScenarioStylePlugin(PluginWithFilename):
     @classmethod
     def add_options(cls, option_manager: OptionManager):
         option_manager.add_option(
-            '--is-context-assert-optional',
-            type=str,
-            default='false',
-            parse_from_config=True,
-            help='If allure labels decorator is required for every test',
-        )
-        option_manager.add_option(
             '--scenario-params-max-count',
             default=Defaults.MAX_PARAMS_COUNT,
             type=int,
