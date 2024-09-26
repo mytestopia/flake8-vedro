@@ -123,4 +123,4 @@ class ScopeVarIsPartiallyRedefined(Error):
 
 class ContextWithoutAssert(Error):
     code = 'VDR313'
-    message = 'context does not have an assert'
+    message = 'context "{context_name}" does not have an assert'

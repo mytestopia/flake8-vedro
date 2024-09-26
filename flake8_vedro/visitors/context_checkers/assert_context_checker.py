@@ -5,7 +5,10 @@ from flake8_plugin_utils import Error
 
 from flake8_vedro.abstract_checkers import ContextChecker
 from flake8_vedro.errors import ContextWithoutAssert
-from flake8_vedro.visitors.context_assert_visitor import Context, ContextAssertVisitor
+from flake8_vedro.visitors.context_assert_visitor import (
+    Context,
+    ContextAssertVisitor
+)
 
 
 @ContextAssertVisitor.register_context_checker
@@ -26,6 +29,7 @@ class ContextAssertChecker(ContextChecker):
                         break
 
         if not has_assert:
-            errors.append(ContextWithoutAssert(context.context_node.lineno, context.context_node.col_offset))
+            errors.append(ContextWithoutAssert(context.context_node.lineno, context.context_node.col_offset,
+                                               context_name=context.context_node.name))
 
         return errors

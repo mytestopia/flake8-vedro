@@ -22,7 +22,7 @@ setup(
     python_requires=">=3.10",
     url="https://github.com/mytestopia/flake8-vedro",
     author="Anna",
-    author_email="testopia13@gmail.com",    
+    author_email="testopia13@gmail.com",
     license="Apache-2.0",
     packages=find_packages(exclude=("tests",)),
     package_data={"flake8_vedro": ["py.typed"]},
