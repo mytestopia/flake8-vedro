@@ -15,7 +15,7 @@ class Context:
         self.filename = filename
 
 
-class ContextAssertVisitor(VisitorWithFilename):
+class ContextVisitor(VisitorWithFilename):
     context_checkers: List[ContextChecker] = []
 
     def __init__(self, config: Optional[Config] = None,
@@ -36,9 +36,6 @@ class ContextAssertVisitor(VisitorWithFilename):
         cls.context_checkers = []
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> List[Error]:
-        if self.config.is_context_assert_optional:
-            return []
-
         for decorator in node.decorator_list:
             if (isinstance(decorator, ast.Attribute)
                     and decorator.value.id == 'vedro'
@@ -53,9 +50,6 @@ class ContextAssertVisitor(VisitorWithFilename):
                           f'Exception: {e}')
 
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> List[Error]:
-        if self.config.is_context_assert_optional:
-            return []
-
         for decorator in node.decorator_list:
             if (isinstance(decorator, ast.Attribute)
                     and decorator.value.id == 'vedro'

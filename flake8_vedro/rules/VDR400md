@@ -1,5 +1,5 @@
-# VDR313. contexts should have an assertion
-The Vedro framework Сontexts should contain assertion:)
+# VDR400. contexts should have an assertion
+The Vedro framework Сontexts should contain an assertion. The context determines the bringing of the service into a specific state. These guarantees use statements on the status pages, as well as in the history of mocks, the presence of which is mandatory.
 ### ❌ Anti-pattern
 ```python
 # ./contexts/registered_user.py

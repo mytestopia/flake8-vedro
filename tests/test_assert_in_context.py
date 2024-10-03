@@ -2,119 +2,154 @@ from flake8_plugin_utils import assert_error, assert_not_error
 
 from flake8_vedro.config import DefaultConfig
 from flake8_vedro.errors.errors import ContextWithoutAssert
-from flake8_vedro.visitors.context_assert_visitor import ContextAssertVisitor
+from flake8_vedro.visitors.context_visitor import ContextVisitor
 from flake8_vedro.visitors.context_checkers import ContextAssertChecker
 
 
 def test_function_def_without_assert_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f(): pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
+    assert_error(ContextVisitor, code, ContextWithoutAssert, context_name='f',
                  config=DefaultConfig(is_context_assert_optional=False))
+
+def test_function_def_without_decorator_and_assert_when_not_optional():
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
+    code = """
+    def f(): pass
+    """
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_function_def_without_assert_when_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f(): pass
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=True))
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=True))
 
 
 def test_function_def_without_assert_in_with_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f():
         with ():
             pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
+    assert_error(ContextVisitor, code, ContextWithoutAssert, context_name='f',
+                 config=DefaultConfig(is_context_assert_optional=False))
+
+
+def test_function_def_without_assert_in_async_with_when_not_optional():
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
+    code = """
+    @vedro.context
+    def f():
+        async with ():
+            pass
+    """
+    assert_error(ContextVisitor, code, ContextWithoutAssert, context_name='f',
+                 config=DefaultConfig(is_context_assert_optional=False))
+
+
+def test_function_def_without_assert_in_two_with_when_not_optional():
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
+    code = """
+    @vedro.context
+    def f():
+        with mock_1():
+            with mock_2(): 
+               pass
+    """
+    assert_error(ContextVisitor, code, ContextWithoutAssert, context_name='f',
                  config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_function_def_without_assert_in_with_when_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f():
         with ():
             pass
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=True))
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=True))
 
 
 def test_function_def_assert_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f(): assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_function_def_assert_in_with_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     def f():
         with ():
             assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_async_function_def_without_assert_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f(): pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
+    assert_error(ContextVisitor, code, ContextWithoutAssert, context_name='f',
                  config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_async_function_def_without_assert_in_with_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f():
         with ():
             pass
     """
-    assert_error(ContextAssertVisitor, code, ContextWithoutAssert,
+    assert_error(ContextVisitor, code, ContextWithoutAssert, context_name='f',
                  config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_async_function_def_assert_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f(): assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
 
 
 def test_async_function_def_assert_in_with_when_not_optional():
-    ContextAssertVisitor.deregister_all()
-    ContextAssertVisitor.register_context_checker(ContextAssertChecker)
+    ContextVisitor.deregister_all()
+    ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
     @vedro.context
     async def f():
         with ():
             assert page.is_visible()
     """
-    assert_not_error(ContextAssertVisitor, code, config=DefaultConfig(is_context_assert_optional=False))
+    assert_not_error(ContextVisitor, code, config=DefaultConfig(is_context_assert_optional=False))

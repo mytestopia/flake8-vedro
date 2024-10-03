@@ -1,4 +1,4 @@
-from .context_assert_visitor import ContextAssertVisitor
+from .context_visitor import ContextVisitor
 from .context_checkers import ContextAssertChecker
 from .scenario_checkers import (
     LocationChecker,

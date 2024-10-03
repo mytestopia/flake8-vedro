@@ -1,1 +1,1 @@
-from .assert_context_checker import ContextAssertChecker
+from .assert_checker import ContextAssertChecker

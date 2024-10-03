@@ -5,7 +5,7 @@ from typing import Callable, List, Optional
 from flake8.options.manager import OptionManager
 from flake8_plugin_utils import Plugin, Visitor
 
-from flake8_vedro.visitors import ContextAssertVisitor, ScenarioVisitor
+from flake8_vedro.visitors import ContextVisitor, ScenarioVisitor
 
 from .config import Config
 from .defaults import Defaults
@@ -39,7 +39,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
     version = '1.0.2'
     visitors = [
         ScenarioVisitor,
-        ContextAssertVisitor
+        ContextVisitor
     ]
 
     def __init__(self, tree: ast.AST, filename: str, *args, **kwargs):
