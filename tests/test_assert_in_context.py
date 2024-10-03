@@ -61,7 +61,7 @@ def test_function_def_without_assert_in_async_with_when_not_optional():
                  config=DefaultConfig(is_context_assert_optional=False))
 
 
-def test_function_def_without_assert_in_two_with_when_not_optional():
+def test_function_def_without_assert_in_double_nested_with_when_not_optional():
     ContextVisitor.deregister_all()
     ContextVisitor.register_context_checker(ContextAssertChecker)
     code = """
