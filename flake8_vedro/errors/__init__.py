@@ -20,5 +20,6 @@ from .errors import (
     SubjectDuplicated,
     SubjectEmpty,
     SubjectIsNotParametrized,
-    SubjectNotFound
+    SubjectNotFound,
+    StepWithMockedRequestCheckNotFound
 )

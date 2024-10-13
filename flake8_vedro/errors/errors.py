@@ -119,3 +119,8 @@ class ScopeVarIsRedefined(Error):
 class ScopeVarIsPartiallyRedefined(Error):
     code = 'VDR312'
     message = 'scope variable "{name}" is partially redefined'
+
+
+class StepWithMockedRequestCheckNotFound(Error):
+    code = 'VDR313'
+    message = 'scenario should have at least one step with "request ... sent" if mocks are used in when step'

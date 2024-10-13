@@ -8,3 +8,4 @@ from .scope_redefinition_checker import ScopeRedefinitionChecker
 from .then_checker import SingleThenChecker
 from .useless_assert_checker import UselessAssertChecker
 from .when_checker import SingleWhenChecker
+from .mocked_requests_checker import MockedRequestsChecker
