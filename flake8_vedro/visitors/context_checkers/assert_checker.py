@@ -19,8 +19,8 @@ class ContextAssertChecker(ContextChecker):
             if isinstance(line, ast.Assert):
                 has_assert = True
                 break
-
-            has_assert = self._has_assert_in_block(context.context_node.body)
+            elif isinstance(line, (ast.With, ast.AsyncWith)):
+                has_assert = self._has_assert_in_block(context.context_node.body)
 
         if not has_assert:
             errors.append(ContextWithoutAssert(context.context_node.lineno, context.context_node.col_offset,
