@@ -5,13 +5,13 @@ from flake8_plugin_utils import Error
 
 from flake8_vedro.abstract_checkers import ContextChecker
 from flake8_vedro.config import Config
-from flake8_vedro.types import StepType
+from flake8_vedro.types import FuncType
 from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
 
 
 class Context:
-    def __init__(self, context_node: List[StepType], filename: str):
-        self.context_node = context_node
+    def __init__(self, node: List[FuncType], filename: str):
+        self.node = node
         self.filename = filename
 
 
@@ -43,7 +43,7 @@ class ContextVisitor(VisitorWithFilename):
             if (isinstance(decorator, ast.Attribute)
                     and decorator.value.id == 'vedro'
                     and decorator.attr == 'context'):
-                context = Context(context_node=node,
+                context = Context(node=node,
                                   filename=self.filename)
                 try:
                     for checker in self.context_checkers:
