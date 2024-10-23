@@ -1,1 +1,1 @@
-from .types import StepType
+from .types import FuncType

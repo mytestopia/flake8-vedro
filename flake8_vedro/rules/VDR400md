@@ -1,0 +1,25 @@
+# VDR400. contexts should have an assertion
+The Vedro framework Сontexts should contain an assertion. This ensures that the application state has changed
+### ❌ Anti-pattern
+```python
+# ./contexts/registered_user.py
+import vedro
+from interfaces.chat_api import ChatApi
+
+@vedro.context
+def registered_user(user):
+    response = ChatApi().register(user) # <- no assert
+
+```
+### ✅Best practice
+```python
+# ./contexts/registered_user.py
+import vedro
+from interfaces.chat_api import ChatApi
+
+@vedro.context
+def registered_user(user):
+    response = ChatApi().register(user)
+    assert response.status_code == 200
+```
+

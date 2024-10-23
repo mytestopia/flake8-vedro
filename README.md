@@ -23,6 +23,7 @@ Some rules in linter should be configurated:
 [flake8]
 scenario_params_max_count = 8  # VDR109
 allowed_to_redefine_list = page,page2  # VDR311
+is_context_assert_optional = true     # VDR400
 ```
 
 ## Rules
@@ -53,3 +54,7 @@ allowed_to_redefine_list = page,page2  # VDR311
 11. [VDR310. Some steps should not have an assertion](./flake8_vedro/rules/VDR310.md)
 12. [VDR311. Scope variables should not be redefined](./flake8_vedro/rules/VDR311.md)
 13. [VDR312. Scope variables should not be partially redefined](./flake8_vedro/rules/VDR312.md)
+
+
+###  Contexts Rules
+14. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400md)

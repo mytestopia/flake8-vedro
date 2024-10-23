@@ -7,12 +7,12 @@ from flake8_vedro.abstract_checkers import (
     StepsChecker
 )
 from flake8_vedro.config import Config
-from flake8_vedro.types import StepType
+from flake8_vedro.types import FuncType
 from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
 
 
 class Context:
-    def __init__(self, steps: List[StepType], scenario_node: ast.ClassDef,
+    def __init__(self, steps: List[FuncType], scenario_node: ast.ClassDef,
                  import_from_nodes: List[ast.ImportFrom],
                  filename: str):
         self.steps = steps
