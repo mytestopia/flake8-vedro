@@ -1,23 +1,24 @@
 import ast
-from typing import List
+from typing import List, Tuple
 
 from flake8_plugin_utils import Error
 
 from flake8_vedro.abstract_checkers import StepsChecker
-from flake8_vedro.errors import StepWithMockedRequestCheckNotFound
-from flake8_vedro.helpers import unwrap_name_from_ast_node, get_ast_name_node_name
+from flake8_vedro.errors import MockCallResultNotSavedAsVariable, MockHistoryNotAsserted
+from flake8_vedro.types import StepType
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
 
-def _check_mocked_context_manager_in_line(line) -> bool:
-    if isinstance(line, ast.With) or isinstance(line, ast.AsyncWith):
-        for item in line.items:
-            context_manager_name_node = unwrap_name_from_ast_node(item.context_expr)
-            context_manager_name = get_ast_name_node_name(context_manager_name_node)
-            if context_manager_name.startswith('mocked'):
-                return True
+def get_mock_context_managers(step: StepType) -> List[Tuple[ast.withitem, int, int]]:
+    """Returns list of context managers that start with 'mock' and their positions (line and column offset)"""
+    mock_context_managers: List[Tuple[ast.withitem, int, int]] = []
+    for line in step.body:
+        if isinstance(line, ast.With) or isinstance(line, ast.AsyncWith):
+            for item in line.items:
+                if isinstance(item.context_expr, ast.Call) and item.context_expr.func.id.startswith('mock'):
+                    mock_context_managers.append((item, line.lineno, line.col_offset))
 
-    return False
+    return mock_context_managers
 
 
 @ScenarioVisitor.register_steps_checker
@@ -27,31 +28,33 @@ class MockedRequestsChecker(StepsChecker):
         errors = []
         when_steps = self.get_when_steps(context.steps)
 
-        lineno = context.scenario_node.lineno
-        col_offset = context.scenario_node.col_offset
-
-        is_mock_in_when_step = False
+        mock_context_managers = []
         for step in when_steps:
-            for line in step.body:
-                if _check_mocked_context_manager_in_line(line):
-                    is_mock_in_when_step = True
-                    break
+            mock_context_managers = get_mock_context_managers(step)
+            for context_manager, lineno, col_offset in mock_context_managers:
+                if context_manager.optional_vars is None:
+                    errors.append(MockCallResultNotSavedAsVariable(lineno, col_offset,
+                                                                   mock_name=context_manager.context_expr.func.id))
 
-        if is_mock_in_when_step:
-            print('\nMock was found in when step')
-
-            found_request_check_step = False
-            for step in context.steps:
-                if (
-                    step.name.startswith('then')
-                    or step.name.startswith('and')
-                    or step.name.startswith('but')
-                ):
-                    if 'request' in step.name and 'sent' in step.name:
-                        print('\nStep with "request ... sent" was found')
-                        found_request_check_step = True
-
-            if not found_request_check_step:
-                errors.append(StepWithMockedRequestCheckNotFound(lineno, col_offset))
+        for context_manager, lineno, col_offset in mock_context_managers:
+            if isinstance(context_manager.optional_vars, ast.Attribute):
+                print(f'Context manager {context_manager.context_expr.func.id} has '
+                      f'{context_manager.optional_vars.value.id}.{context_manager.optional_vars.attr} var')
+                mock_assert_found = False
+                for step in context.steps:
+                    if step.name.startswith('then') or step.name.startswith('and') or step.name.startswith('but'):
+                        for line in step.body:
+                            if isinstance(line, ast.Assert) and isinstance(line.test, ast.Compare):
+                                if isinstance(line.test.left, ast.Attribute) and \
+                                        isinstance(line.test.left.value, ast.Attribute):
+                                    if line.test.left.value.value.id == context_manager.optional_vars.value.id and \
+                                            line.test.left.value.attr == context_manager.optional_vars.attr and \
+                                            line.test.left.attr == 'history':
+                                        mock_assert_found = True
+                if not mock_assert_found:
+                    errors.append(MockHistoryNotAsserted(
+                        lineno,
+                        col_offset,
+                        mock_var=f'{context_manager.optional_vars.value.id}.{context_manager.optional_vars.attr}'))
 
         return errors

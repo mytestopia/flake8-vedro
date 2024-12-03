@@ -121,6 +121,11 @@ class ScopeVarIsPartiallyRedefined(Error):
     message = 'scope variable "{name}" is partially redefined'
 
 
-class StepWithMockedRequestCheckNotFound(Error):
+class MockCallResultNotSavedAsVariable(Error):
     code = 'VDR313'
-    message = 'scenario should have at least one step with "request ... sent" if mocks are used in when step'
+    message = 'mock "{mock_name}" call result should be assigned to a variable for further assertions'
+
+
+class MockHistoryNotAsserted(Error):
+    code = 'VDR314'
+    message = 'mock history of "{mock_var}" should be asserted in then (and, but) step'
