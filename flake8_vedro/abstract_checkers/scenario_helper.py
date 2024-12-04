@@ -59,6 +59,11 @@ class ScenarioHelper:
             step for step in steps if step.name.startswith('then')
         ]
 
+    def get_then_and_but_steps(self, steps: List) -> List:
+        return [
+            step for step in steps if step.name.startswith(('then', 'and', 'but'))
+        ]
+
     def is_file_in_folder(self, filename: str,
                           folder: str = SCENARIOS_FOLDER) -> bool:
         path = pathlib.Path(filename)

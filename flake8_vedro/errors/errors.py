@@ -123,9 +123,9 @@ class ScopeVarIsPartiallyRedefined(Error):
 
 class MockCallResultNotSavedAsVariable(Error):
     code = 'VDR313'
-    message = 'mock "{mock_name}" call result should be assigned to a variable for further assertions'
+    message = 'mock "{mock_func_name}" call result should be assigned to a variable for further assertions'
 
 
 class MockHistoryNotAsserted(Error):
     code = 'VDR314'
-    message = 'mock history of "{mock_var}" should be asserted in then (and, but) step'
+    message = 'mock history of "{mock_var_name}" should be asserted in then (and, but) step'

@@ -12,9 +12,13 @@ def test_mocked_request_check():
             def given(self):
                 self.var_1 = 1
             def when(self):
-                async with x, b(), mocked_hotel() as self.hotels_mock, mocked_offers_error() as b, mocked_destinations, mocked_favorites() as a:
+                async with x, b(), mocked_hotel() as a.a:
                     self.page.button.tap()
             def then_booking_request_was_sent_with_correct_params(self):
-                assert self.hotels_mock.history == 1
+                assert len(a.a) == 1
+            def and_booking_request_was_sent_with_correct_params(self):
+                assert len(self.fhotel_mock) == 1
+            def but_booking_request_was_sent_with_correct_params(self):
+                assert len(a.a) == 1
         """
     assert_not_error(ScenarioVisitor, code)
