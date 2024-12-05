@@ -15,10 +15,11 @@ def test_mocked_request_check():
                 async with x, b(), mocked_hotel() as a.a:
                     self.page.button.tap()
             def then_booking_request_was_sent_with_correct_params(self):
-                assert len(a.a) == 1
+                for i in range(2):
+                    assert len(a.a) == 1
             def and_booking_request_was_sent_with_correct_params(self):
                 assert len(self.fhotel_mock) == 1
             def but_booking_request_was_sent_with_correct_params(self):
-                assert len(a.a) == 1
+                assert len(aа.a) == 1
         """
     assert_not_error(ScenarioVisitor, code)

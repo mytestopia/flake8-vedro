@@ -10,28 +10,36 @@ from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
 
 def get_mock_context_managers_from_step(step: StepType) -> List[Tuple[ast.withitem, int, int]]:
-    """Returns list of context managers that start with 'mock' and their positions (line and column offset)"""
+    """Returns list of context managers that start with 'mock' and their positions (line and column offset)."""
     mock_context_managers: List[Tuple[ast.withitem, int, int]] = []
-    for line in step.body:
-        if isinstance(line, ast.With) or isinstance(line, ast.AsyncWith):
-            for item in line.items:
-                if isinstance(item.context_expr, ast.Call) and item.context_expr.func.id.startswith('mock'):
-                    mock_context_managers.append((item, line.lineno, line.col_offset))
+
+    for statement in step.body:
+        if isinstance(statement, (ast.With, ast.AsyncWith)):
+            for item in statement.items:
+                if (
+                    isinstance(item.context_expr, ast.Call) and
+                    isinstance(item.context_expr.func, ast.Name) and
+                    item.context_expr.func.id.startswith("mock")
+                ):
+                    mock_context_managers.append((item, statement.lineno, statement.col_offset))
 
     return mock_context_managers
 
 
 def is_mock_assert_found_in_step(step: StepType, mock_var: ast.Attribute) -> bool:
-    """Searches for mock assert in step and returns result as bool"""
-    is_mock_assert_found = False
-    for line in step.body:
-        if isinstance(line, ast.Assert):
-            for node in ast.walk(line.test):
-                if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
-                    if node.value.id == mock_var.value.id and node.attr == mock_var.attr:
-                        is_mock_assert_found = True
-                        print(ast.dump(node))
-    return is_mock_assert_found
+    """Searches for mock assert in step and returns result as bool."""
+    for statement in step.body:
+        for statement_node in ast.walk(statement):
+            if isinstance(statement_node, ast.Assert):
+                for assert_node in ast.walk(statement_node.test):
+                    if (
+                            isinstance(assert_node, ast.Attribute) and
+                            isinstance(assert_node.value, ast.Name) and
+                            assert_node.value.id == mock_var.value.id and
+                            assert_node.attr == mock_var.attr
+                    ):
+                        return True
+    return False
 
 
 @ScenarioVisitor.register_steps_checker
