@@ -26,19 +26,20 @@ def get_mock_context_managers_from_step(step: StepType) -> List[Tuple[ast.withit
     return mock_context_managers
 
 
-def is_mock_assert_found_in_step(step: StepType, mock_var: ast.Attribute) -> bool:
+def is_mock_assert_found_in_steps(steps: List[StepType], mock_var: ast.Attribute) -> bool:
     """Searches for mock assert in step and returns result as bool."""
-    for statement in step.body:
-        for statement_node in ast.walk(statement):
-            if isinstance(statement_node, ast.Assert):
-                for assert_node in ast.walk(statement_node.test):
-                    if (
-                            isinstance(assert_node, ast.Attribute) and
-                            isinstance(assert_node.value, ast.Name) and
-                            assert_node.value.id == mock_var.value.id and
-                            assert_node.attr == mock_var.attr
-                    ):
-                        return True
+    for step in steps:
+        for statement in step.body:
+            for statement_node in ast.walk(statement):
+                if isinstance(statement_node, ast.Assert):
+                    for assert_node in ast.walk(statement_node.test):
+                        if (
+                                isinstance(assert_node, ast.Attribute) and
+                                isinstance(assert_node.value, ast.Name) and
+                                assert_node.value.id == mock_var.value.id and
+                                assert_node.attr == mock_var.attr
+                        ):
+                            return True
     return False
 
 
@@ -58,13 +59,10 @@ class MockedRequestsChecker(StepsChecker):
             mock_var = context_manager.optional_vars
             if not isinstance(mock_var, ast.Attribute):
                 errors.append(MockCallResultNotSavedAsVariable(lineno, col_offset, mock_func_name=mock_func_name))
-            else:
-                is_mock_assert_found = False
-                for step in then_and_but_steps:
-                    if is_mock_assert_found := is_mock_assert_found_in_step(step, mock_var):
-                        break
-                if not is_mock_assert_found:
-                    mock_var_name = '{}.{}'.format(mock_var.value.id, mock_var.attr)
-                    errors.append(MockHistoryNotAsserted(lineno, col_offset, mock_var_name=mock_var_name))
+                continue
+
+            if not is_mock_assert_found_in_steps(then_and_but_steps, mock_var):
+                mock_var_name = '{}.{}'.format(mock_var.value.id, mock_var.attr)
+                errors.append(MockHistoryNotAsserted(lineno, col_offset, mock_var_name=mock_var_name))
 
         return errors
