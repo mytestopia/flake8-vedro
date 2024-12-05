@@ -53,3 +53,5 @@ allowed_to_redefine_list = page,page2  # VDR311
 11. [VDR310. Some steps should not have an assertion](./flake8_vedro/rules/VDR310.md)
 12. [VDR311. Scope variables should not be redefined](./flake8_vedro/rules/VDR311.md)
 13. [VDR312. Scope variables should not be partially redefined](./flake8_vedro/rules/VDR312.md)
+14. [VDR313. Mock call result should be saved as "self" attribute for assert in further steps](./flake8_vedro/rules/VDR313.md)
+15. [VDR314. Mock call result should be asserted in "then" or "and" or "but" step](./flake8_vedro/rules/VDR314.md)
