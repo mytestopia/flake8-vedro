@@ -21,6 +21,6 @@ from .errors import (
     SubjectEmpty,
     SubjectIsNotParametrized,
     SubjectNotFound,
-    MockCallResultNotSavedAsVariable,
-    MockHistoryNotAsserted
+    MockCallResultNotSavedAsSelfAttribute,
+    MockCallResultNotAsserted
 )

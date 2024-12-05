@@ -121,11 +121,11 @@ class ScopeVarIsPartiallyRedefined(Error):
     message = 'scope variable "{name}" is partially redefined'
 
 
-class MockCallResultNotSavedAsVariable(Error):
+class MockCallResultNotSavedAsSelfAttribute(Error):
     code = 'VDR313'
-    message = 'mock "{mock_func_name}" call result should be assigned to a variable for further assertions'
+    message = 'Result of "{mock_func_name}()" should be saved as "self" attribute for assert in further steps'
 
 
-class MockHistoryNotAsserted(Error):
+class MockCallResultNotAsserted(Error):
     code = 'VDR314'
-    message = 'mock history of "{mock_var_name}" should be asserted in then (and, but) step'
+    message = 'Mock call result "{mock_var_name}" should be asserted in "then" or "and" or "but" step'
