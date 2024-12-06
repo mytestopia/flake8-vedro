@@ -5,7 +5,7 @@ from typing import Callable, List, Optional
 from flake8.options.manager import OptionManager
 from flake8_plugin_utils import Plugin, Visitor
 
-from flake8_vedro.visitors import ScenarioVisitor
+from flake8_vedro.visitors import ContextVisitor, ScenarioVisitor
 
 from .config import Config
 from .defaults import Defaults
@@ -36,9 +36,10 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.0.1'
+    version = '1.0.2'
     visitors = [
         ScenarioVisitor,
+        ContextVisitor
     ]
 
     def __init__(self, tree: ast.AST, filename: str, *args, **kwargs):
@@ -46,6 +47,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
 
     @classmethod
     def add_options(cls, option_manager: OptionManager):
+        option_manager.add_option(
+            '--is-context-assert-optional',
+            default='true',
+            type=str,
+            parse_from_config=True,
+            help='If contexts should have specific assertions',
+        )
         option_manager.add_option(
             '--scenario-params-max-count',
             default=Defaults.MAX_PARAMS_COUNT,
@@ -66,6 +74,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
         cls, option_manager: OptionManager, options: argparse.Namespace, args: List[str]
     ) -> Config:
         return Config(
+            is_context_assert_optional=str_to_bool(options.is_context_assert_optional),
             max_params_count=options.scenario_params_max_count,
             allowed_to_redefine_list=options.allowed_to_redefine_list,
         )

@@ -129,3 +129,9 @@ class MockCallResultNotSavedAsSelfAttribute(Error):
 class MockCallResultNotAsserted(Error):
     code = 'VDR314'
     message = 'Mock call result "{mock_var_name}" should be asserted in "then" or "and" or "but" step'
+
+
+class ContextWithoutAssert(Error):
+    code = 'VDR400'
+    message = 'context "{context_name}" does not have an assert'
+

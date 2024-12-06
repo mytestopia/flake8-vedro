@@ -1,5 +1,6 @@
 from .errors import (
     ContextCallInParams,
+    ContextWithoutAssert,
     DecoratorVedroOnly,
     ExceedMaxParamsCount,
     ImportedInterfaceInWrongStep,
