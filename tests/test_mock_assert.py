@@ -1,5 +1,6 @@
 from flake8_plugin_utils import assert_error, assert_not_error
 
+from flake8_vedro.config import DefaultConfig
 from flake8_vedro.errors import MockCallResultNotSavedAsSelfAttribute, MockCallResultNotAsserted
 from flake8_vedro.visitors.scenario_visitor import ScenarioVisitor
 from flake8_vedro.visitors.steps_checkers import MockAssertChecker
@@ -16,7 +17,22 @@ def test_context_manager_mock_result_not_saved():
             def then(self):
                 pass
         """
-    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute, mock_func_name='mocked_hotel')
+    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute,
+                 mock_func_name='mocked_hotel', config=DefaultConfig(is_mock_assert_optional=False))
+
+
+def test_context_manager_mock_result_not_saved_when_rule_is_optional():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(MockAssertChecker)
+    code = """
+        class Scenario(vedro.Scenario):
+            def given(self): pass
+            def when(self):
+                with mocked_hotel(): pass
+            def then(self):
+                pass
+        """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=True))
 
 
 def test_context_manager_mock_result_saved_as_func_var():
@@ -30,7 +46,8 @@ def test_context_manager_mock_result_saved_as_func_var():
             def then(self):
                 pass
         """
-    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute, mock_func_name='mocked_hotel')
+    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute,
+                 mock_func_name='mocked_hotel', config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_other_object_attribute():
@@ -44,7 +61,8 @@ def test_context_manager_mock_result_saved_as_other_object_attribute():
             def then(self):
                 pass
         """
-    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute, mock_func_name='mocked_hotel')
+    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute,
+                 mock_func_name='mocked_hotel', config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_nested_self_attribute():
@@ -58,7 +76,8 @@ def test_context_manager_mock_result_saved_as_nested_self_attribute():
             def then(self):
                 pass
         """
-    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute, mock_func_name='mocked_hotel')
+    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute, mock_func_name='mocked_hotel',
+                 config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_self_attribute_but_not_asserted():
@@ -72,7 +91,22 @@ def test_context_manager_mock_result_saved_as_self_attribute_but_not_asserted():
             def then(self):
                 pass
         """
-    assert_error(ScenarioVisitor, code, MockCallResultNotAsserted, mock_var_name='self.hotel_mock')
+    assert_error(ScenarioVisitor, code, MockCallResultNotAsserted,
+                 mock_var_name='self.hotel_mock', config=DefaultConfig(is_mock_assert_optional=False))
+
+
+def test_context_manager_mock_result_saved_as_self_attribute_but_not_asserted_when_rule_is_optional():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(MockAssertChecker)
+    code = """
+        class Scenario(vedro.Scenario):
+            def given(self): pass
+            def when(self):
+                with mocked_hotel() as self.hotel_mock: pass
+            def then(self):
+                pass
+        """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=True))
 
 
 def test_async_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_then_step():
@@ -86,7 +120,7 @@ def test_async_context_manager_mock_result_saved_as_self_attribute_and_asserted_
             def then(self):
                 assert self.hotel_mock
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_and_step():
@@ -101,7 +135,7 @@ def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_and
             def and_(self):
                 assert self.hotel_mock
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_but_step():
@@ -117,7 +151,7 @@ def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_but
             def but(self):
                 assert self.hotel_mock
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_self_attribute_and_its_own_attribute_asserted():
@@ -131,7 +165,7 @@ def test_context_manager_mock_result_saved_as_self_attribute_and_its_own_attribu
             def then(self):
                 assert self.hotel_mock.history[0] == {}
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_with_function():
@@ -145,7 +179,7 @@ def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_with_f
             def then(self):
                 assert len(self.hotel_mock) == 1
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
 def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_loop():
@@ -160,10 +194,9 @@ def test_context_manager_mock_result_saved_as_self_attribute_and_asserted_in_loo
                 for i in range(2):
                     assert self.hotel_mock
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
-# This test should assert error when persistent mock assert checker is implemented
 def test_persistent_mock_result_not_saved():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(MockAssertChecker)
@@ -175,10 +208,9 @@ def test_persistent_mock_result_not_saved():
             def then(self):
                 pass
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
 
 
-# This test should assert error when persistent mock assert checker is implemented
 def test_persistent_mock_result_saved_as_self_attribute_but_not_asserted():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(MockAssertChecker)
@@ -190,4 +222,4 @@ def test_persistent_mock_result_saved_as_self_attribute_but_not_asserted():
             def then(self):
                 pass
         """
-    assert_not_error(ScenarioVisitor, code)
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))

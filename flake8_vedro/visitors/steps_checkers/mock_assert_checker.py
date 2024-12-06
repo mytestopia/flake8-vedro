@@ -5,7 +5,7 @@ from flake8_plugin_utils import Error
 
 from flake8_vedro.abstract_checkers import StepsChecker
 from flake8_vedro.errors import MockCallResultNotSavedAsSelfAttribute, MockCallResultNotAsserted
-from flake8_vedro.types import StepType
+from flake8_vedro.types import FuncType
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
 
@@ -13,6 +13,9 @@ from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 class MockAssertChecker(StepsChecker):
 
     def check_steps(self, context: Context, config) -> List[Error]:
+        if config.is_mock_assert_optional:
+            return []
+
         errors = []
         when_steps = self.get_when_steps(context.steps)
         then_and_but_steps = self.get_then_and_but_steps(context.steps)
@@ -34,7 +37,7 @@ class MockAssertChecker(StepsChecker):
         return errors
 
 
-def _get_mock_context_managers_from_step(step: StepType) -> List[Tuple[ast.withitem, int, int]]:
+def _get_mock_context_managers_from_step(step: FuncType) -> List[Tuple[ast.withitem, int, int]]:
     """Returns list of context managers that start with 'mock' and their positions (line and column offset)."""
     mock_context_managers: List[Tuple[ast.withitem, int, int]] = []
 
@@ -62,7 +65,7 @@ def _is_self_attribute(node: ast.expr) -> bool:
     return False
 
 
-def _is_self_attribute_assert_found_in_steps(steps: List[StepType], self_attribute: ast.Attribute) -> bool:
+def _is_self_attribute_assert_found_in_steps(steps: List[FuncType], self_attribute: ast.Attribute) -> bool:
     """Searches for self_attribute (e.g., self.offers_mock) assert in steps and returns result as bool."""
     if not _is_self_attribute(self_attribute):
         raise ValueError('Parameter "self_attribute" expects a "self" attribute (e.g., self.attribute_name)')

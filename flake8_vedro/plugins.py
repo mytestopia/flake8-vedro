@@ -36,7 +36,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.0.2'
+    version = '1.0.3'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
@@ -53,6 +53,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             type=str,
             parse_from_config=True,
             help='If contexts should have specific assertions',
+        )
+        option_manager.add_option(
+            '--is-mock-assert-optional',
+            default='true',
+            type=str,
+            parse_from_config=True,
+            help='If mocks should be asserted (e.g., to check mock history)',
         )
         option_manager.add_option(
             '--scenario-params-max-count',
@@ -75,6 +82,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
     ) -> Config:
         return Config(
             is_context_assert_optional=str_to_bool(options.is_context_assert_optional),
+            is_mock_assert_optional=str_to_bool(options.is_mock_assert_optional),
             max_params_count=options.scenario_params_max_count,
             allowed_to_redefine_list=options.allowed_to_redefine_list,
         )
