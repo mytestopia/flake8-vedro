@@ -61,4 +61,3 @@ is_mock_assert_optional = true  # VDR313, # VDR314
 
 ###  Contexts Rules
 16. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400md)
->>>>>>> main
