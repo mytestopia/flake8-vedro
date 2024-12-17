@@ -20,6 +20,47 @@ def test_context_manager_mock_result_not_saved():
                  mock_func_name='mocked_hotel', config=DefaultConfig(is_mock_assert_optional=False))
 
 
+def test_other_context_manager_result_not_saved():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(MockAssertChecker)
+    code = """
+        class Scenario(vedro.Scenario):
+            def given(self): pass
+            def when(self):
+                with hotel_stub(): pass
+            def then(self): pass
+        """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
+
+
+def test_context_manager_grpc_mock_result_not_saved():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(MockAssertChecker)
+    code = """
+        class Scenario(vedro.Scenario):
+            def given(self): pass
+            def when(self):
+                with mocked_hotel_grpc(): pass
+            def then(self): pass
+        """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(is_mock_assert_optional=False))
+
+
+def test_context_manager_mock_result_not_saved_when_custom_mock_name_pattern():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(MockAssertChecker)
+    code = """
+        class Scenario(vedro.Scenario):
+            def given(self): pass
+            def when(self):
+                with hotel_stub(): pass
+            def then(self): pass
+        """
+    assert_error(ScenarioVisitor, code, MockCallResultNotSavedAsSelfAttribute,
+                 mock_func_name='hotel_stub',
+                 config=DefaultConfig(is_mock_assert_optional=False, mock_name_pattern=r"(?=.*stub)"))
+
+
 def test_nested_context_manager_mock_result_not_saved():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(MockAssertChecker)

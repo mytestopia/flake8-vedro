@@ -62,6 +62,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             help='If mocks should be asserted (e.g., to check mock history)',
         )
         option_manager.add_option(
+            '--mock-name-pattern',
+            default=r"(?=.*mock)(?!.*grpc)",
+            type=str,
+            parse_from_config=True,
+            help='Mock function name pattern to match when searching for mocks for further assertions',
+        )
+        option_manager.add_option(
             '--scenario-params-max-count',
             default=Defaults.MAX_PARAMS_COUNT,
             type=int,
@@ -83,6 +90,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
         return Config(
             is_context_assert_optional=str_to_bool(options.is_context_assert_optional),
             is_mock_assert_optional=str_to_bool(options.is_mock_assert_optional),
+            mock_name_pattern=options.mock_name_pattern,
             max_params_count=options.scenario_params_max_count,
             allowed_to_redefine_list=options.allowed_to_redefine_list,
         )

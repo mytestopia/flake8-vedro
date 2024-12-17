@@ -1,4 +1,5 @@
 import ast
+import re
 from typing import List, Tuple
 
 from flake8_plugin_utils import Error
@@ -23,7 +24,7 @@ class MockAssertChecker(StepsChecker):
         if not when_steps or not assertion_steps:
             return []
 
-        mock_context_managers = _get_mock_context_managers_from_step(when_steps[0])
+        mock_context_managers = _get_mock_context_managers_from_step(when_steps[0], config.mock_name_pattern)
         for context_manager, lineno, col_offset in mock_context_managers:
             mock_func_name = context_manager.context_expr.func.id
             mock_var = context_manager.optional_vars
@@ -39,8 +40,8 @@ class MockAssertChecker(StepsChecker):
         return errors
 
 
-def _get_mock_context_managers_from_step(step: FuncType) -> List[Tuple[ast.withitem, int, int]]:
-    """Returns list of context managers that start with 'mock' and their positions (line and column offset)."""
+def _get_mock_context_managers_from_step(step: FuncType, mock_name_pattern: str) -> List[Tuple[ast.withitem, int, int]]:
+    """Returns list of context managers that match mock_name_pattern and their positions (line and column offset)."""
     mock_context_managers: List[Tuple[ast.withitem, int, int]] = []
 
     for statement in step.body:
@@ -50,7 +51,7 @@ def _get_mock_context_managers_from_step(step: FuncType) -> List[Tuple[ast.withi
                     if (
                         isinstance(item.context_expr, ast.Call) and
                         isinstance(item.context_expr.func, ast.Name) and
-                        item.context_expr.func.id.startswith("mock")
+                        re.search(mock_name_pattern, item.context_expr.func.id)
                     ):
                         mock_context_managers.append((item, statement.lineno, statement.col_offset))
 
