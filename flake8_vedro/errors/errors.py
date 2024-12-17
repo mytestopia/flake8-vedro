@@ -123,12 +123,12 @@ class ScopeVarIsPartiallyRedefined(Error):
 
 class MockCallResultNotSavedAsSelfAttribute(Error):
     code = 'VDR313'
-    message = 'Result of "{mock_func_name}()" should be saved as "self" attribute for assert in further steps'
+    message = 'result of "{mock_func_name}()" should be saved as "self" attribute for further assertion'
 
 
 class MockCallResultNotAsserted(Error):
     code = 'VDR314'
-    message = 'Mock call result "{mock_var_name}" should be asserted in "then" or "and" or "but" step'
+    message = 'mock call result "{mock_var_name}" should be asserted in "then" or "and" or "but" step'
 
 
 class ContextWithoutAssert(Error):

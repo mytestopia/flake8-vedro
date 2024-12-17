@@ -59,10 +59,19 @@ class ScenarioHelper:
             step for step in steps if step.name.startswith('then')
         ]
 
-    def get_then_and_but_steps(self, steps: List) -> List:
+    def get_assertion_steps(self, steps: List) -> List:
         return [
             step for step in steps if step.name.startswith(('then', 'and', 'but'))
         ]
+
+    def get_assert_statements_from_steps(self, steps: List) -> List[ast.Assert]:
+        assert_statements = []
+        for step in steps:
+            for statement in step.body:
+                for statement_node in ast.walk(statement):
+                    if isinstance(statement_node, ast.Assert):
+                        assert_statements.append(statement_node)
+        return assert_statements
 
     def is_file_in_folder(self, filename: str,
                           folder: str = SCENARIOS_FOLDER) -> bool:
