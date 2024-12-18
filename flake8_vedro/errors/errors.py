@@ -134,4 +134,3 @@ class MockCallResultNotAsserted(Error):
 class ContextWithoutAssert(Error):
     code = 'VDR400'
     message = 'context "{context_name}" does not have an assert'
-

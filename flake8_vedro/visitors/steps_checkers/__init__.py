@@ -1,5 +1,6 @@
 from .assert_checker import AssertChecker
 from .interfaces_checker import InterfacesUsageChecker
+from .mock_assert_checker import MockAssertChecker
 from .name_checker import NameChecker
 from .no_assert_checker import NoAssertChecker
 from .order_checker import OrderChecker
@@ -8,4 +9,3 @@ from .scope_redefinition_checker import ScopeRedefinitionChecker
 from .then_checker import SingleThenChecker
 from .useless_assert_checker import UselessAssertChecker
 from .when_checker import SingleWhenChecker
-from .mock_assert_checker import MockAssertChecker

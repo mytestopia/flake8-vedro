@@ -4,6 +4,8 @@ from .errors import (
     DecoratorVedroOnly,
     ExceedMaxParamsCount,
     ImportedInterfaceInWrongStep,
+    MockCallResultNotAsserted,
+    MockCallResultNotSavedAsSelfAttribute,
     ScenarioLocationInvalid,
     ScenarioNotInherited,
     ScopeVarIsPartiallyRedefined,
@@ -21,7 +23,5 @@ from .errors import (
     SubjectDuplicated,
     SubjectEmpty,
     SubjectIsNotParametrized,
-    SubjectNotFound,
-    MockCallResultNotSavedAsSelfAttribute,
-    MockCallResultNotAsserted
+    SubjectNotFound
 )

@@ -5,7 +5,10 @@ from typing import List, Tuple
 from flake8_plugin_utils import Error
 
 from flake8_vedro.abstract_checkers import StepsChecker
-from flake8_vedro.errors import MockCallResultNotSavedAsSelfAttribute, MockCallResultNotAsserted
+from flake8_vedro.errors import (
+    MockCallResultNotAsserted,
+    MockCallResultNotSavedAsSelfAttribute
+)
 from flake8_vedro.helpers import is_self_attribute, is_self_attribute_asserted
 from flake8_vedro.types import FuncType
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
@@ -40,7 +43,8 @@ class MockAssertChecker(StepsChecker):
         return errors
 
 
-def _get_mock_context_managers_from_step(step: FuncType, mock_name_pattern: str) -> List[Tuple[ast.withitem, int, int]]:
+def _get_mock_context_managers_from_step(step: FuncType,
+                                         mock_name_pattern: str) -> List[Tuple[ast.withitem, int, int]]:
     """Returns list of context managers that match mock_name_pattern and their positions (line and column offset)."""
     mock_context_managers: List[Tuple[ast.withitem, int, int]] = []
 
@@ -49,9 +53,9 @@ def _get_mock_context_managers_from_step(step: FuncType, mock_name_pattern: str)
             if isinstance(statement_node, (ast.With, ast.AsyncWith)):
                 for item in statement_node.items:
                     if (
-                        isinstance(item.context_expr, ast.Call) and
-                        isinstance(item.context_expr.func, ast.Name) and
-                        re.search(mock_name_pattern, item.context_expr.func.id)
+                            isinstance(item.context_expr, ast.Call)
+                            and isinstance(item.context_expr.func, ast.Name)
+                            and re.search(mock_name_pattern, item.context_expr.func.id)
                     ):
                         mock_context_managers.append((item, statement.lineno, statement.col_offset))
 

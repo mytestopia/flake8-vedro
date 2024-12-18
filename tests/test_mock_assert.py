@@ -1,7 +1,10 @@
 from flake8_plugin_utils import assert_error, assert_not_error
 
 from flake8_vedro.config import DefaultConfig
-from flake8_vedro.errors import MockCallResultNotSavedAsSelfAttribute, MockCallResultNotAsserted
+from flake8_vedro.errors import (
+    MockCallResultNotAsserted,
+    MockCallResultNotSavedAsSelfAttribute
+)
 from flake8_vedro.visitors.scenario_visitor import ScenarioVisitor
 from flake8_vedro.visitors.steps_checkers import MockAssertChecker
 
@@ -85,7 +88,7 @@ def test_enumerated_context_manager_mock_result_not_saved():
             def given(self): pass
             def when(self):
                 with (
-                         mocked_hotel() as self.hotel_mock, 
+                         mocked_hotel() as self.hotel_mock,
                          mocked_offers()
                      ): pass
             def then(self):
@@ -188,7 +191,7 @@ def test_enumerated_context_manager_mock_result_saved_as_self_attribute_but_not_
             def given(self): pass
             def when(self):
                 with (
-                         mocked_hotel() as self.hotel_mock, 
+                         mocked_hotel() as self.hotel_mock,
                          mocked_offers() as self.offers_mock
                      ): pass
             def then(self):

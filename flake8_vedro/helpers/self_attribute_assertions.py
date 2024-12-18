@@ -5,9 +5,9 @@ from typing import List
 def is_self_attribute(node: ast.expr) -> bool:
     """Checks if node is a 'self' attribute (e.g., self.offers_mock)."""
     if (
-            isinstance(node, ast.Attribute) and
-            isinstance(node.value, ast.Name) and
-            node.value.id == 'self'
+            isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == 'self'
     ):
         return True
     return False
@@ -21,10 +21,10 @@ def is_self_attribute_asserted(assert_statements: List[ast.Assert], self_attribu
     for assert_statement in assert_statements:
         for condition_node in ast.walk(assert_statement.test):
             if (
-                    isinstance(condition_node, ast.Attribute) and
-                    isinstance(condition_node.value, ast.Name) and
-                    condition_node.value.id == self_attribute.value.id and
-                    condition_node.attr == self_attribute.attr
+                    isinstance(condition_node, ast.Attribute)
+                    and isinstance(condition_node.value, ast.Name)
+                    and condition_node.value.id == self_attribute.value.id
+                    and condition_node.attr == self_attribute.attr
             ):
                 return True
     return False
