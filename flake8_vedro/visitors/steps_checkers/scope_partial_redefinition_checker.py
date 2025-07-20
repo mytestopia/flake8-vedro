@@ -19,7 +19,7 @@ class ScopePartialRedefinitionChecker(StepsChecker):
         """
         self.foo["key"] = ... -> "foo"
         self.foo["key1"]["key2"] = ... -> "foo"
-        self.foo = ... -> None]
+        self.foo = ... -> None
         foo["key"] = ... -> None
         """
         if not isinstance(target, ast.Subscript):
@@ -31,14 +31,34 @@ class ScopePartialRedefinitionChecker(StepsChecker):
 
     def check_steps(self, context: Context, config) -> List[Error]:
         errors = []
+        scope_vars = set()
         for step in context.steps:
+            scope_vars_in_step = set()
             for line in step.body:
 
                 if not isinstance(line, ast.Assign):
                     continue
 
                 for target in line.targets:
-                    name = self._get_self_dict_name(target)
+
+                    name = None
+                    if isinstance(target, ast.Attribute):
+                        name = self._get_self_attribute_name(target)
+                    elif isinstance(target, ast.Subscript):
+                         name = self._get_self_dict_name(target)
                     if name:
-                        errors.append(ScopeVarIsPartiallyRedefined(line.lineno, line.col_offset, name=name))
+                        scope_vars_in_step.add(name)
+
+                    if config.allow_partial_redefinitions_in_one_step:
+
+                        if name in scope_vars:
+                            errors.append(
+                                ScopeVarIsPartiallyRedefined(line.lineno, line.col_offset,
+                                                             name=name))
+                    else:
+
+                        name = self._get_self_dict_name(target)
+                        if name:
+                            errors.append(ScopeVarIsPartiallyRedefined(line.lineno, line.col_offset, name=name))
+            scope_vars.update(scope_vars_in_step)
         return errors

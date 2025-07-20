@@ -36,7 +36,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.0.2'
+    version = '1.0.3'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
@@ -68,6 +68,19 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             parse_from_config=True,
             help='List of scope variables allowed to redefine',
         )
+        option_manager.add_option(
+            '--allowed-interfaces-list',
+            comma_separated_list=True,
+            parse_from_config=True,
+            help='List of interfaces allowed to use in any steps (like KafkaApi)',
+        )
+        option_manager.add_option(
+            '--allow-partial-redefinitions-in-one-step',
+            default='false',
+            type=str,
+            parse_from_config=True,
+            help='Allow partial redefinitions in one step',
+        )
 
     @classmethod
     def parse_options_to_config(
@@ -77,4 +90,6 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             is_context_assert_optional=str_to_bool(options.is_context_assert_optional),
             max_params_count=options.scenario_params_max_count,
             allowed_to_redefine_list=options.allowed_to_redefine_list,
+            allowed_interfaces_list=options.allowed_interfaces_list,
+            allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
         )
