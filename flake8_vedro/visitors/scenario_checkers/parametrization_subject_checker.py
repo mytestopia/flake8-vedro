@@ -19,7 +19,7 @@ class ParametrizationSubjectChecker(ScenarioChecker):
 
             if len(params_decorator) > 1:
                 subject_node = self.get_subject(context.scenario_node)
-                pattern = re.compile('^.*\{.+\}.*$')  # noqa: W605
+                pattern = re.compile(r'^.*{.+}.*$')
                 if not pattern.match(subject_node.value.value):
                     return [SubjectIsNotParametrized(subject_node.lineno, subject_node.col_offset)]
         return []

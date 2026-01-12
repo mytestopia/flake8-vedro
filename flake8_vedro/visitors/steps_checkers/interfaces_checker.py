@@ -1,5 +1,5 @@
 import ast
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from flake8_plugin_utils import Error
 
@@ -39,8 +39,8 @@ class InterfacesUsageChecker(StepsChecker):
                     ast_calls.append((line, line.value.value))
         return ast_calls
 
-
-    def _get_func_names_in_step(self, step: ast.FunctionDef or ast.AsyncFunctionDef) -> List[Tuple[str, int, int]]:
+    def _get_func_names_in_step(
+            self, step: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> List[Tuple[str, int, int]]:
         """
         Return list of names and their positions (line and column offset) in file for functions,
         which are called in step from argument

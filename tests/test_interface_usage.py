@@ -210,7 +210,7 @@ def test_call_interface_inside_nested_with():
     from interfaces.api import API
 
     class Scenario:
-        def given(): 
+        def given():
             with mock_1():
                 with mock_2():
                     API()
@@ -227,7 +227,7 @@ def test_call_interface_inside_with_async():
     from interfaces.api import API
 
     class Scenario:
-        def given(): 
+        def given():
             async with mock_1():
                 with mock_2():
                     API()
@@ -244,7 +244,7 @@ def test_call_interface_inside_with():
     from interfaces.api import API
 
     class Scenario:
-        def given(): 
+        def given():
             with (mock_1(), mock_2()):
                 API()
     """
@@ -272,7 +272,7 @@ def test_interface_imported_allowed_and_not_allowed():
     from interfaces.kafka import KafkaApi
     from interfaces.app import AppApi
     class Scenario:
-        def given(): 
+        def given():
             KafkaApi.get()
             AppApi().get()
     """

@@ -1,7 +1,8 @@
 import ast
+from typing import Optional
 
 
-def unwrap_name_from_ast_node(element: ast.Attribute or ast.Call or ast.Name) -> ast.Name:
+def unwrap_name_from_ast_node(element: ast.expr) -> Optional[ast.Name]:
     if isinstance(element, ast.Attribute):
         return unwrap_name_from_ast_node(element.value)
 
