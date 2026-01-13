@@ -1,5 +1,5 @@
 import ast
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 from flake8_plugin_utils import Error
 
@@ -10,6 +10,7 @@ from flake8_vedro.helpers import (
     get_imported_from_dir_functions,
     unwrap_name_from_ast_node
 )
+from flake8_vedro.types import FuncType
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
 
@@ -40,7 +41,7 @@ class InterfacesUsageChecker(StepsChecker):
         return ast_calls
 
     def _get_func_names_in_step(
-            self, step: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> List[Tuple[str, int, int]]:
+            self, step: FuncType) -> List[Tuple[str, int, int]]:
         """
         Return list of names and their positions (line and column offset) in file for functions,
         which are called in step from argument

@@ -26,6 +26,7 @@ allowed_to_redefine_list = page,page2  # VDR311
 is_context_assert_optional = true     # VDR400
 allowed_interfaces_list = KafkaApi,SmthApi  # VDR302
 allow_partial_redefinitions_in_one_step = True # VDR312
+allow_unused_context_attributes = False  # VDR313
 ```
 
 ## Rules
@@ -56,7 +57,8 @@ allow_partial_redefinitions_in_one_step = True # VDR312
 11. [VDR310. Some steps should not have an assertion](./flake8_vedro/rules/VDR310.md)
 12. [VDR311. Scope variables should not be redefined](./flake8_vedro/rules/VDR311.md)
 13. [VDR312. Scope variables should not be partially redefined](./flake8_vedro/rules/VDR312.md)
+14. [VDR313. Scope variables should not be left unused](./flake8_vedro/rules/VDR313.md)
 
 
 ###  Contexts Rules
-14. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400md)
+15. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400md)
