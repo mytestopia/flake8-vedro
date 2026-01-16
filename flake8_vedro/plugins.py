@@ -99,5 +99,5 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allowed_to_redefine_list=options.allowed_to_redefine_list,
             allowed_interfaces_list=options.allowed_interfaces_list,
             allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
-            allow_unused_context_attributes=str_to_bool(options.allow_unused_context_attributes)
+            allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes)
         )

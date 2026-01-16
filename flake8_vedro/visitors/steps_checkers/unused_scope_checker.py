@@ -34,7 +34,8 @@ class UnusedScopeVariablesChecker(StepsChecker):
         for step in context.steps:
             usages |= get_all_used_scope_variables(step)
             definitions.extend(
-                get_all_scope_variables(step, skip_context_manager_attributes=config.allow_unused_context_attributes)
+                get_all_scope_variables(
+                    step, skip_context_manager_attributes=config.allow_unused_with_block_attributes)
             )
 
         errors = []

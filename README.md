@@ -26,7 +26,7 @@ allowed_to_redefine_list = page,page2  # VDR311
 is_context_assert_optional = true     # VDR400
 allowed_interfaces_list = KafkaApi,SmthApi  # VDR302
 allow_partial_redefinitions_in_one_step = True # VDR312
-allow_unused_context_attributes = False  # VDR313
+allow_unused_with_block_attributes = False  # VDR313
 ```
 
 ## Rules

@@ -58,7 +58,7 @@ def test_not_allowed_unused_variable_in_when_step():
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable", config=DefaultConfig())
 
 
-def test_allowed_unused_context_variable_by_default():
+def test_allowed_unused_with_attribute_by_default():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
     code = """
@@ -75,7 +75,7 @@ def test_allowed_unused_context_variable_by_default():
     assert_not_error(ScenarioVisitor, code, config=DefaultConfig())
 
 
-def test_not_allowed_unused_context_variable_setting():
+def test_not_allowed_unused_with_attribute_setting():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
     code = """
@@ -90,10 +90,10 @@ def test_not_allowed_unused_context_variable_setting():
                  Api().method(self.variable)
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
-                 config=DefaultConfig(allow_unused_context_attributes=False))
+                 config=DefaultConfig(allow_unused_with_block_attributes=False))
 
 
-def test_not_allowed_unused_tupled_context_variable_setting():
+def test_not_allowed_unused_packed_with_attribute_setting():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
     code = """
@@ -105,10 +105,10 @@ def test_not_allowed_unused_tupled_context_variable_setting():
                  Api().method(self.variable)
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
-                 config=DefaultConfig(allow_unused_context_attributes=False))
+                 config=DefaultConfig(allow_unused_with_block_attributes=False))
 
 
-def test_not_allowed_unused_context_variable_for_few_contexts_setting():
+def test_not_allowed_unused_with_attribute_for_few_contexts_setting():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
     code = """
@@ -123,7 +123,7 @@ def test_not_allowed_unused_context_variable_for_few_contexts_setting():
                  Api().method(self.variable)
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
-                 config=DefaultConfig(allow_unused_context_attributes=False))
+                 config=DefaultConfig(allow_unused_with_block_attributes=False))
 
 
 def test_allowed_unused_underscored_variable():
@@ -217,7 +217,7 @@ def test_not_allowed_unused_init_variables():
             self.unused_subject = subject
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_subject",
-                 config=DefaultConfig(allow_unused_context_attributes=False))
+                 config=DefaultConfig(allow_unused_with_block_attributes=False))
 
 
 def test_not_allowed_unused_unpacked_variable():
