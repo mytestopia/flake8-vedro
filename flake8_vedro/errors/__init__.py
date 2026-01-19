@@ -6,6 +6,7 @@ from .errors import (
     ImportedInterfaceInWrongStep,
     ScenarioLocationInvalid,
     ScenarioNotInherited,
+    ScopeVarIsNotUsed,
     ScopeVarIsPartiallyRedefined,
     ScopeVarIsRedefined,
     StepAssertHasComparisonWithoutAssert,

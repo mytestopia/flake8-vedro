@@ -140,7 +140,7 @@ def test_saving_partial_dict_to_self():
         def given1(self):
             self.message = {'payload': {'id': '12345'}}
             self.message['payload'] = {'id': '1'}
-        
+
         def given2(self):
             id = self.message['payload']['id']
     """

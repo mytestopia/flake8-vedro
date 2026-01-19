@@ -1,5 +1,5 @@
 import ast
-from typing import List, Optional, Type, Union
+from typing import List, Optional, Type
 
 from flake8_plugin_utils import Error
 
@@ -35,7 +35,7 @@ class ContextVisitor(VisitorWithFilename):
     def deregister_all(cls):
         cls.context_checkers = []
 
-    def _check_context_decorator(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]):
+    def _check_context_decorator(self, node: FuncType):
         if self.config.is_context_assert_optional:
             return []
 

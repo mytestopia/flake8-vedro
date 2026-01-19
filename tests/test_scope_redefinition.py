@@ -233,3 +233,18 @@ def test_not_allowed_assign_redefinition():
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsRedefined, name='var',
                  config=DefaultConfig(allowed_to_redefine_list=['page']))
+
+
+def test_not_allowed_aug_assign_redefinition():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(ScopeRedefinitionChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        def given(self):
+            self.var = 1
+        def when(self):
+            for _ in range(3):
+                self.var += 1
+    """
+    assert_error(ScenarioVisitor, code, ScopeVarIsRedefined, name='var',
+                 config=DefaultConfig(allowed_to_redefine_list=['page']))

@@ -36,7 +36,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.0.3'
+    version = '1.1.0'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
@@ -81,6 +81,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             parse_from_config=True,
             help='Allow partial redefinitions in one step',
         )
+        option_manager.add_option(
+            '--allow-unused-context-attributes',
+            default='true',
+            type=str,
+            parse_from_config=True,
+            help='Allow unused context variables',
+        )
 
     @classmethod
     def parse_options_to_config(
@@ -92,4 +99,5 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allowed_to_redefine_list=options.allowed_to_redefine_list,
             allowed_interfaces_list=options.allowed_interfaces_list,
             allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
+            allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes)
         )

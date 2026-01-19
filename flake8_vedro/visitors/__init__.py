@@ -19,5 +19,6 @@ from .steps_checkers import (
     OrderChecker,
     SingleThenChecker,
     SingleWhenChecker,
-    UselessAssertChecker
+    UselessAssertChecker,
+    UnusedScopeVariablesChecker
 )

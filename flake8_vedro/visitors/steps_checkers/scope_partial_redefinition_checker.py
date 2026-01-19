@@ -45,7 +45,7 @@ class ScopePartialRedefinitionChecker(StepsChecker):
                     if isinstance(target, ast.Attribute):
                         name = self._get_self_attribute_name(target)
                     elif isinstance(target, ast.Subscript):
-                         name = self._get_self_dict_name(target)
+                        name = self._get_self_dict_name(target)
                     if name:
                         scope_vars_in_step.add(name)
 
