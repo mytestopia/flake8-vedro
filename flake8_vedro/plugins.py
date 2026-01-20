@@ -88,6 +88,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             parse_from_config=True,
             help='Allow unused with block attributes',
         )
+        option_manager.add_option(
+            '--allow-unused-with-block-attributes',
+            default='true',
+            type=str,
+            parse_from_config=True,
+            help='Allow unused with block attributes',
+        )
 
     @classmethod
     def parse_options_to_config(
