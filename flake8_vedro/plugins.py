@@ -36,7 +36,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.1.0'
+    version = '1.1.1'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
@@ -87,6 +87,13 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             type=str,
             parse_from_config=True,
             help='Allow unused context variables',
+        )
+        option_manager.add_option(
+            '--allow-unused-with-block-attributes',
+            default='true',
+            type=str,
+            parse_from_config=True,
+            help='Allow unused with block attributes',
         )
 
     @classmethod
