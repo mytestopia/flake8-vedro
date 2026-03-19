@@ -190,6 +190,77 @@ def test_call_async_class_method():
                  func_name='API')
 
 
+def test_call_async_class_instance_method():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
+    code = """
+    from interfaces.api import API
+
+    class Scenario:
+        def given(): await API().get()
+    """
+    assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
+                 config=DefaultConfig(),
+                 func_name='API')
+
+
+def test_call_async_method_as_assign():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
+    code = """
+    from interfaces import get
+
+    class Scenario:
+        def given(): response = await get()
+    """
+    assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
+                 config=DefaultConfig(),
+                 func_name='get')
+
+
+def test_call_async_class_method_as_assign():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
+    code = """
+    from interfaces.api import API
+
+    class Scenario:
+        def given(): response = await API().get()
+    """
+    assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
+                 config=DefaultConfig(),
+                 func_name='API')
+
+
+def test_call_async_class_method_as_assign_subscript():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
+    code = """
+    from interfaces.api import API
+
+    class Scenario:
+        def given(): response = (await API().get())[0]
+    """
+    assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
+                 config=DefaultConfig(),
+                 func_name='API')
+
+
+def test_call_async_method_in_when():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
+    code = """
+    from interfaces.api import API
+    from contexts import added
+
+    class Scenario:
+        def given(): added()
+        def when(): response = await API().get()
+    """
+    assert_not_error(ScenarioVisitor, code,
+                     config=DefaultConfig())
+
+
 def test_schema():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
