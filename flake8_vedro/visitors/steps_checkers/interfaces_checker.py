@@ -24,12 +24,19 @@ class InterfacesUsageChecker(StepsChecker):
                 ast_calls.extend(self.get_ast_call_in_body(line.body))
 
             elif isinstance(line, ast.Assign):  # foo = ...
+                value = line.value
+                # Unwrap await if present: foo = await func()
+                if isinstance(value, ast.Await):
+                    value = value.value
 
-                if isinstance(line.value, ast.Subscript):  # ... = func()[0]
-                    if isinstance(line.value.value, ast.Call):
-                        ast_calls.append((line, line.value.value))
-                elif isinstance(line.value, ast.Call):  # ... = func()
-                    ast_calls.append((line, line.value))
+                if isinstance(value, ast.Subscript):  # ... = func()[0]
+                    subscript_value = value.value
+                    if isinstance(subscript_value, ast.Await):
+                        subscript_value = subscript_value.value
+                    if isinstance(subscript_value, ast.Call):
+                        ast_calls.append((line, subscript_value))
+                elif isinstance(value, ast.Call):  # ... = func()
+                    ast_calls.append((line, value))
 
             elif isinstance(line, ast.Expr):
                 if isinstance(line.value, ast.Call):  # func()
