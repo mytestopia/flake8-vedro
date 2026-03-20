@@ -38,9 +38,19 @@ class UnusedScopeVariablesChecker(StepsChecker):
                     step, skip_context_manager_attributes=config.allow_unused_with_block_attributes)
             )
 
+        ignore_pattern = None
+        if config.ignore_variables_pattern:
+            ignore_pattern = re.compile(config.ignore_variables_pattern)
+
         errors = []
         for var_name, lineno, col_offset in definitions:
-            if not var_name.startswith('_') and var_name not in usages:
-                errors.append(ScopeVarIsNotUsed(lineno, col_offset, name=var_name))
+            if (
+                var_name.startswith('_') 
+                or var_name in usages 
+                or ignore_pattern and ignore_pattern.search(var_name)
+            ):
+                continue
+
+            errors.append(ScopeVarIsNotUsed(lineno, col_offset, name=var_name))
 
         return errors
