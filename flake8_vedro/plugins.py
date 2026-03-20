@@ -53,7 +53,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             default='true',
             type=str,
             parse_from_config=True,
-            help='If contexts should have specific assertions',
+            help='If contexts should have specific assertions (rule VDR400)',
         )
         option_manager.add_option(
             '--scenario-params-max-count',
@@ -61,40 +61,40 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             type=int,
             parse_from_config=True,
             help='Maximum allowed parameters in vedro parametrized scenario. '
-                 '(Default: %(default)s)',
+                 '(Default: %(default)s) (rule VDR109)',
         )
         option_manager.add_option(
             '--allowed-to-redefine-list',
             comma_separated_list=True,
             parse_from_config=True,
-            help='List of scope variables allowed to redefine',
+            help='List of scope variables allowed to redefine (rule VDR311)',
         )
         option_manager.add_option(
             '--allowed-interfaces-list',
             comma_separated_list=True,
             parse_from_config=True,
-            help='List of interfaces allowed to use in any steps (like KafkaApi)',
+            help='List of interfaces allowed to use in any steps (rule VDR302)',
         )
         option_manager.add_option(
             '--allow-partial-redefinitions-in-one-step',
             default='false',
             type=str,
             parse_from_config=True,
-            help='Allow partial redefinitions in one step',
+            help='Allow partial redefinitions in one step (rule VDR312)',
         )
         option_manager.add_option(
             '--allow-unused-with-block-attributes',
             default='true',
             type=str,
             parse_from_config=True,
-            help='Allow unused with block attributes',
+            help='Allow unused with block attributes (rule VDR313)',
         )
         option_manager.add_option(
             '--ignore-variables-pattern',
             default=None,
             type=str,
             parse_from_config=True,
-            help='Regex pattern for variable names to ignore in VDR313 (unused scope variables)',
+            help='Regex pattern for variable names to ignore (rule VDR313)',
         )
 
     @classmethod
