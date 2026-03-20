@@ -234,3 +234,110 @@ def test_not_allowed_unused_unpacked_variable():
             Api().method(self.variable)
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable", config=DefaultConfig())
+
+
+def test_ignored_variable_by_pattern():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.log_data = 2
+
+        def when(self):
+            Api().method(self.variable)
+    """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
+
+
+def test_ignored_variable_by_pattern_multiple_matches():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.log_data = 2
+            self.history = 3
+
+        def when(self):
+            Api().method(self.variable)
+    """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^(log|history).*"))
+
+
+def test_ignored_variable_by_pattern_all_matches():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.log_data = 2
+            self.history = 3
+            self.something = 4
+
+        def when(self):
+            Api().method()
+    """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern="\w*"))
+
+
+def test_not_ignored_variable_when_pattern_does_not_match():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.unused_variable = 2
+
+        def when(self):
+            Api().method(self.variable)
+    """
+    assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
+                 config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
+
+
+def test_ignored_variable_by_pattern_without_pattern():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.unused_variable = 2
+
+        def when(self):
+            Api().method(self.variable)
+    """
+    assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
+                 config=DefaultConfig(ignore_variables_pattern=None))
+
+
+def test_ignored_variable_by_pattern_partial_match():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.my_log_data = 2
+
+        def when(self):
+            Api().method(self.variable)
+    """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"log"))
