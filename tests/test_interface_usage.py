@@ -324,6 +324,22 @@ def test_call_interface_inside_with():
                  func_name='API')
 
 
+def test_call_deep_nested_class_instance_method():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)
+    code = """
+    from contexts import func
+    from interfaces.api import API
+
+    class Scenario:
+        def given(): 
+            self.variable = (1 + func(4 + (await API().get()[0])[0]))
+    """
+    assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
+                 config=DefaultConfig(),
+                 func_name='API')
+
+
 def test_interface_imported_allowed():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(InterfacesUsageChecker)

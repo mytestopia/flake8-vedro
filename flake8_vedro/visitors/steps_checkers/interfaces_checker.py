@@ -17,55 +17,35 @@ from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 @ScenarioVisitor.register_steps_checker
 class InterfacesUsageChecker(StepsChecker):
 
-    def get_ast_call_in_body(self, body):
-        ast_calls = []
-        for line in body:
-            if isinstance(line, ast.With) or isinstance(line, ast.AsyncWith):
-                ast_calls.extend(self.get_ast_call_in_body(line.body))
+    @staticmethod
+    def _get_ast_calls_in_body(body):
+        return [
+            (line, node)
+            for line in body
+            for node in ast.walk(line)
+            if isinstance(node, ast.Call)
+        ]
 
-            elif isinstance(line, ast.Assign):  # foo = ...
-                value = line.value
-                # Unwrap await if present: foo = await func()
-                if isinstance(value, ast.Await):
-                    value = value.value
-
-                if isinstance(value, ast.Subscript):  # ... = func()[0]
-                    subscript_value = value.value
-                    if isinstance(subscript_value, ast.Await):
-                        subscript_value = subscript_value.value
-                    if isinstance(subscript_value, ast.Call):
-                        ast_calls.append((line, subscript_value))
-                elif isinstance(value, ast.Call):  # ... = func()
-                    ast_calls.append((line, value))
-
-            elif isinstance(line, ast.Expr):
-                if isinstance(line.value, ast.Call):  # func()
-                    ast_calls.append((line, line.value))
-
-                elif isinstance(line.value, ast.Await) and \
-                        isinstance(line.value.value, ast.Call):
-                    ast_calls.append((line, line.value.value))
-        return ast_calls
-
-    def _get_func_names_in_step(
-            self, step: FuncType) -> List[Tuple[str, int, int]]:
+    def _get_called_names_in_step(self, step: FuncType) -> List[Tuple[str, int, int]]:
         """
-        Return list of names and their positions (line and column offset) in file for functions,
+        Return list of names and their positions (line and column offset) in file for classes/functions,
         which are called in step from argument
         """
-        functions_in_step: List[Tuple[str, int, int]] = []
-        ast_calls = self.get_ast_call_in_body(step.body)
+        classes_or_functions_in_step: List[Tuple[str, int, int]] = []
 
+        ast_calls = self._get_ast_calls_in_body(step.body)
         for line, ast_call in ast_calls:
-            name_node = unwrap_name_from_ast_node(ast_call.func)
-            name = get_ast_name_node_name(name_node) if name_node else None
-            if name:
-                functions_in_step.append((
-                    name,
-                    line.lineno,
-                    line.col_offset  # TODO fix
-                ))
-        return functions_in_step
+            name_node = unwrap_name_from_ast_node(ast_call)
+            if name_node and (name := get_ast_name_node_name(name_node)):
+                call = (name, line.lineno, line.col_offset)
+
+                # Chain calls like API().get() produce multiple ast.Call nodes with
+                # identical (name, lineno, col_offset), causing duplicate linter warnings.
+                # It reduces linter output's readability, so we deduplicate same calls here.
+                if call not in classes_or_functions_in_step:
+                    classes_or_functions_in_step.append(call)
+
+        return classes_or_functions_in_step
 
     def check_steps(self, context: Context, config) -> List[Error]:
         imported_interfaces = get_imported_from_dir_functions(
@@ -89,7 +69,7 @@ class InterfacesUsageChecker(StepsChecker):
                 or step.name.startswith('and')
                 or step.name.startswith('but')
             ):
-                for func, lineno, col_offset in self._get_func_names_in_step(step):
+                for func, lineno, col_offset in self._get_called_names_in_step(step):
                     for func_name in imported_interfaces:
                         if func == func_name.name or func == func_name.asname:
                             errors.append(ImportedInterfaceInWrongStep(
