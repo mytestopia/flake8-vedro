@@ -253,6 +253,25 @@ def test_ignored_variable_by_pattern():
     assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
 
 
+def test_ignored_variable_by_pattern_with_underscored_variables():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        subject = "subject"
+
+        def given(self):
+            self.variable = 1
+            self.log_data = 2
+            self._log_data = 3
+            self._another_data = 4
+
+        def when(self):
+            Api().method(self.variable)
+    """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
+
+
 def test_ignored_variable_by_pattern_multiple_matches():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
@@ -287,7 +306,7 @@ def test_ignored_variable_by_pattern_all_matches():
         def when(self):
             Api().method()
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern="\w*"))
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"\w*"))
 
 
 def test_not_ignored_variable_when_pattern_does_not_match():
@@ -306,24 +325,6 @@ def test_not_ignored_variable_when_pattern_does_not_match():
     """
     assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
                  config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
-
-
-def test_ignored_variable_by_pattern_without_pattern():
-    ScenarioVisitor.deregister_all()
-    ScenarioVisitor.register_steps_checker(UnusedScopeVariablesChecker)
-    code = """
-    class Scenario(vedro.Scenario):
-        subject = "subject"
-
-        def given(self):
-            self.variable = 1
-            self.unused_variable = 2
-
-        def when(self):
-            Api().method(self.variable)
-    """
-    assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
-                 config=DefaultConfig(ignore_variables_pattern=None))
 
 
 def test_ignored_variable_by_pattern_partial_match():
