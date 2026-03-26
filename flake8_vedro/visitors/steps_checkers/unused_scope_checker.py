@@ -20,12 +20,24 @@ class UnusedScopeVariablesChecker(StepsChecker):
     def _get_scope_variables_used_in_subject(self, context: Context) -> set:
         subject = self.get_subject(context.scenario_node)
 
-        # It treats as a mistake in VDR104, VDR105
+        # It is treated as a mistake in VDR104, VDR105
         if not (subject and isinstance(subject.value, ast.Constant)):
             return set()
 
         matches = re.findall(r'{(\w+)(?:\.\w+)*}', subject.value.value)
         return set(matches)
+
+    @staticmethod
+    def _should_ignore_variable(variable_name: str, ignore_pattern: re.Pattern | None) -> bool:
+        # default behaviour
+        if variable_name.startswith('_'):
+            return True
+
+        # user-configured behaviour
+        if ignore_pattern and ignore_pattern.search(variable_name):
+            return True
+
+        return False
 
     def check_steps(self, context: Context, config: Config) -> List[Error]:
         definitions = []
@@ -38,9 +50,15 @@ class UnusedScopeVariablesChecker(StepsChecker):
                     step, skip_context_manager_attributes=config.allow_unused_with_block_attributes)
             )
 
+        ignore_pattern = None
+        if config.ignore_variables_pattern:
+            ignore_pattern = re.compile(config.ignore_variables_pattern)
+
         errors = []
         for var_name, lineno, col_offset in definitions:
-            if not var_name.startswith('_') and var_name not in usages:
-                errors.append(ScopeVarIsNotUsed(lineno, col_offset, name=var_name))
+            if self._should_ignore_variable(var_name, ignore_pattern) or var_name in usages:
+                continue
+
+            errors.append(ScopeVarIsNotUsed(lineno, col_offset, name=var_name))
 
         return errors
