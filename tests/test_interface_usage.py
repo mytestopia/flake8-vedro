@@ -169,7 +169,7 @@ def test_call_async_method():
     from interfaces import get
 
     class Scenario:
-        def given(): await get()
+        async def given(): await get()
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
                  config=DefaultConfig(),
@@ -183,7 +183,7 @@ def test_call_async_class_method():
     from interfaces.api import API
 
     class Scenario:
-        def given(): await API.get()
+        async def given(): await API.get()
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
                  config=DefaultConfig(),
@@ -197,7 +197,7 @@ def test_call_async_class_instance_method():
     from interfaces.api import API
 
     class Scenario:
-        def given(): await API().get()
+        async def given(): await API().get()
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
                  config=DefaultConfig(),
@@ -211,7 +211,7 @@ def test_call_async_method_as_assign():
     from interfaces import get
 
     class Scenario:
-        def given(): response = await get()
+        async def given(): response = await get()
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
                  config=DefaultConfig(),
@@ -225,7 +225,7 @@ def test_call_async_class_method_as_assign():
     from interfaces.api import API
 
     class Scenario:
-        def given(): response = await API().get()
+        async def given(): response = await API().get()
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
                  config=DefaultConfig(),
@@ -239,7 +239,7 @@ def test_call_async_class_method_as_assign_subscript():
     from interfaces.api import API
 
     class Scenario:
-        def given(): response = (await API().get())[0]
+        async def given(): response = (await API().get())[0]
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
                  config=DefaultConfig(),
@@ -255,7 +255,7 @@ def test_call_async_method_in_when():
 
     class Scenario:
         def given(): added()
-        def when(): response = await API().get()
+        async def when(): response = await API().get()
     """
     assert_not_error(ScenarioVisitor, code,
                      config=DefaultConfig())
@@ -332,7 +332,7 @@ def test_call_deep_nested_class_instance_method():
     from interfaces.api import API
 
     class Scenario:
-        def given(): 
+        async def given(): 
             self.variable = (1 + func(4 + (await API().get()[0])[0]))
     """
     assert_error(ScenarioVisitor, code, ImportedInterfaceInWrongStep,
