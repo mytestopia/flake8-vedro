@@ -59,7 +59,8 @@ ignore_variables_pattern = ^(log|history).*  # VDR313
 12. [VDR311. Scope variables should not be redefined](./flake8_vedro/rules/VDR311.md)
 13. [VDR312. Scope variables should not be partially redefined](./flake8_vedro/rules/VDR312.md)
 14. [VDR313. Scope variables should not be left unused](./flake8_vedro/rules/VDR313.md)
+15. [VDR314. Steps should not have branching](./flake8_vedro/rules/VDR314.md)
 
 
 ###  Contexts Rules
-15. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400.md)
+16. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400.md)

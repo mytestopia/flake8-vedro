@@ -13,6 +13,7 @@ from .errors import (
     StepAssertHasUselessAssert,
     StepAssertWithoutAssert,
     StepHasAssert,
+    StepHasBranching,
     StepInvalidName,
     StepsWrongOrder,
     StepThenDuplicated,

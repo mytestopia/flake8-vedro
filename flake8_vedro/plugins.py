@@ -37,7 +37,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.1.2'
+    version = '1.2.0'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
