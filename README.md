@@ -62,4 +62,4 @@ ignore_variables_pattern = ^(log|history).*  # VDR313
 
 
 ###  Contexts Rules
-15. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400md)
+15. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400.md)
