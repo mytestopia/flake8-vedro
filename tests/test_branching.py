@@ -74,6 +74,17 @@ def test_step_with_match_case():
     assert_error(ScenarioVisitor, code, StepHasBranching, step_name="then")
 
 
+def test_step_with_list_comprehension():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(BranchingChecker)
+    code = """
+    class Scenario(vedro.Scenario):
+        def given_list_comprehension(self):
+            self.something = [item for item in something() if item is not None]
+    """
+    assert_not_error(ScenarioVisitor, code)
+
+
 def test_step_without_branching():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(BranchingChecker)
