@@ -277,7 +277,12 @@ def test_ignored_variable_by_pattern_with_underscored_variables():
         def when(self):
             Api().method(self.variable)
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=re.compile(r"^log.*")))
+    assert_not_error(
+        ScenarioVisitor, code,
+        config=DefaultConfig(
+            ignore_variables_pattern=VedroScenarioStylePlugin.parse_ignore_variables_pattern(r"^log.*")
+        )
+    )
 
 
 def test_ignored_variable_by_pattern_multiple_matches():
