@@ -8,7 +8,7 @@ from .scenario_checkers import (
     ParentChecker,
     SingleSubjectChecker,
     SubjectEmptyChecker,
-    VedroOnlyChecker
+    VedroOnlyChecker,
 )
 from .scenario_visitor import Context, ScenarioVisitor
 from .steps_checkers import (
@@ -19,6 +19,6 @@ from .steps_checkers import (
     OrderChecker,
     SingleThenChecker,
     SingleWhenChecker,
+    UnusedScopeVariablesChecker,
     UselessAssertChecker,
-    UnusedScopeVariablesChecker
 )

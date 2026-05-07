@@ -7,6 +7,6 @@ from .order_checker import OrderChecker
 from .scope_partial_redefinition_checker import ScopePartialRedefinitionChecker
 from .scope_redefinition_checker import ScopeRedefinitionChecker
 from .then_checker import SingleThenChecker
+from .unused_scope_checker import UnusedScopeVariablesChecker
 from .useless_assert_checker import UselessAssertChecker
 from .when_checker import SingleWhenChecker
-from .unused_scope_checker import UnusedScopeVariablesChecker

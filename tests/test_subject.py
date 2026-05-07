@@ -1,15 +1,8 @@
 from flake8_plugin_utils import assert_error, assert_not_error
 
-from flake8_vedro.errors import (
-    SubjectDuplicated,
-    SubjectEmpty,
-    SubjectNotFound
-)
+from flake8_vedro.errors import SubjectDuplicated, SubjectEmpty, SubjectNotFound
 from flake8_vedro.visitors import ScenarioVisitor
-from flake8_vedro.visitors.scenario_checkers import (
-    SingleSubjectChecker,
-    SubjectEmptyChecker
-)
+from flake8_vedro.visitors.scenario_checkers import SingleSubjectChecker, SubjectEmptyChecker
 
 
 def test_vedro_scenario_correct_subject():

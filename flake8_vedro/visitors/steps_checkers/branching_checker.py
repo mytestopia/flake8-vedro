@@ -7,7 +7,6 @@ from flake8_vedro.abstract_checkers import StepsChecker
 from flake8_vedro.errors import StepHasBranching
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
-
 STEP_PREFIX_MAP = {
     'init': ('__init__',),
     'given': ('given',),

@@ -1,9 +1,6 @@
 from flake8_plugin_utils import assert_error, assert_not_error
 
-from flake8_vedro.errors import (
-    StepAssertHasComparisonWithoutAssert,
-    StepAssertHasUselessAssert
-)
+from flake8_vedro.errors import StepAssertHasComparisonWithoutAssert, StepAssertHasUselessAssert
 from flake8_vedro.visitors import ScenarioVisitor
 from flake8_vedro.visitors.steps_checkers import UselessAssertChecker
 

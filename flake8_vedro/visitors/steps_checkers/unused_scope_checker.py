@@ -9,7 +9,7 @@ from flake8_vedro.config import Config
 from flake8_vedro.errors import ScopeVarIsNotUsed
 from flake8_vedro.helpers.scope_variables import (
     get_all_scope_variables,
-    get_all_used_scope_variables
+    get_all_used_scope_variables,
 )
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
