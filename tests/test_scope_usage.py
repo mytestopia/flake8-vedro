@@ -1,7 +1,10 @@
+import re
+
 from flake8_plugin_utils import assert_error, assert_not_error
 
 from flake8_vedro.config import DefaultConfig
 from flake8_vedro.errors import ScopeVarIsNotUsed
+from flake8_vedro.plugins import VedroScenarioStylePlugin
 from flake8_vedro.visitors import ScenarioVisitor
 from flake8_vedro.visitors.steps_checkers.unused_scope_checker import UnusedScopeVariablesChecker
 
@@ -250,7 +253,12 @@ def test_ignored_variable_by_pattern():
         def when(self):
             Api().method(self.variable)
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
+    assert_not_error(
+        ScenarioVisitor, code,
+        config=DefaultConfig(
+            ignore_variables_pattern=VedroScenarioStylePlugin.parse_ignore_variables_pattern(r"^log.*")
+        )
+    )
 
 
 def test_ignored_variable_by_pattern_with_underscored_variables():
@@ -269,7 +277,7 @@ def test_ignored_variable_by_pattern_with_underscored_variables():
         def when(self):
             Api().method(self.variable)
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=re.compile(r"^log.*")))
 
 
 def test_ignored_variable_by_pattern_multiple_matches():
@@ -287,7 +295,12 @@ def test_ignored_variable_by_pattern_multiple_matches():
         def when(self):
             Api().method(self.variable)
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"^(log|history).*"))
+    assert_not_error(
+        ScenarioVisitor, code,
+        config=DefaultConfig(
+            ignore_variables_pattern=VedroScenarioStylePlugin.parse_ignore_variables_pattern(r"^(log|history).*")
+        )
+    )
 
 
 def test_ignored_variable_by_pattern_all_matches():
@@ -306,7 +319,10 @@ def test_ignored_variable_by_pattern_all_matches():
         def when(self):
             Api().method()
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"\w*"))
+    assert_not_error(
+        ScenarioVisitor, code,
+        config=DefaultConfig(ignore_variables_pattern=VedroScenarioStylePlugin.parse_ignore_variables_pattern(r"\w*"))
+    )
 
 
 def test_not_ignored_variable_when_pattern_does_not_match():
@@ -323,8 +339,12 @@ def test_not_ignored_variable_when_pattern_does_not_match():
         def when(self):
             Api().method(self.variable)
     """
-    assert_error(ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
-                 config=DefaultConfig(ignore_variables_pattern=r"^log.*"))
+    assert_error(
+        ScenarioVisitor, code, ScopeVarIsNotUsed, name="unused_variable",
+        config=DefaultConfig(
+            ignore_variables_pattern=VedroScenarioStylePlugin.parse_ignore_variables_pattern(r"^log.*")
+        )
+    )
 
 
 def test_ignored_variable_by_pattern_partial_match():
@@ -341,4 +361,7 @@ def test_ignored_variable_by_pattern_partial_match():
         def when(self):
             Api().method(self.variable)
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(ignore_variables_pattern=r"log"))
+    assert_not_error(
+        ScenarioVisitor, code,
+        config=DefaultConfig(ignore_variables_pattern=VedroScenarioStylePlugin.parse_ignore_variables_pattern(r"log"))
+    )

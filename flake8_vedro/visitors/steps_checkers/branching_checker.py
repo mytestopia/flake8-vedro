@@ -8,13 +8,28 @@ from flake8_vedro.errors import StepHasBranching
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
 
+STEP_PREFIX_MAP = {
+    'init': ('__init__',),
+    'given': ('given',),
+    'when': ('when',),
+    'then': ('then', 'and', 'but'),
+}
+
+
 @ScenarioVisitor.register_steps_checker
 class BranchingChecker(StepsChecker):
 
     def check_steps(self, context: Context, config) -> List[Error]:
         errors = []
 
+        allow_ifs_in_steps = tuple()
+        if config is not None:
+            allow_ifs_in_steps = config.allow_ifs_in_steps
+
         for step in context.steps:
+            if step.name.startswith(allow_ifs_in_steps):
+                continue
+
             for if_statement in self._find_if_statements(step):
                 errors.append(
                     StepHasBranching(
