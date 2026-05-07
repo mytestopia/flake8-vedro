@@ -166,7 +166,7 @@ def test_allow_ifs_in_given_step():
     """
     assert_not_error(
         ScenarioVisitor, code, 
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('given'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['given']))
     )
 
 
@@ -179,9 +179,11 @@ def test_allow_ifs_in_given_still_errors_in_when():
             if condition:
                 self.response = Api().method()
     """
-    assert_error(ScenarioVisitor, code, StepHasBranching,
-                 config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('given')),
-                 step_name="when")
+    assert_error(
+        ScenarioVisitor, code, StepHasBranching,
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['given'])),
+        step_name="when"
+    )
 
 
 def test_allow_ifs_in_when_step():
@@ -195,7 +197,7 @@ def test_allow_ifs_in_when_step():
     """
     assert_not_error(
         ScenarioVisitor, code, 
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('when'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['when']))
     )
 
 
@@ -210,7 +212,7 @@ def test_allow_ifs_in_then_step():
     """
     assert_not_error(
         ScenarioVisitor, code,
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('then'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['then']))
     )
 
 
@@ -225,7 +227,7 @@ def test_allow_ifs_in_then_also_allows_and_step():
     """
     assert_not_error(
         ScenarioVisitor, code,
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('then'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['then']))
     )
 
 
@@ -240,7 +242,7 @@ def test_allow_ifs_in_then_also_allows_but_step():
     """
     assert_not_error(
         ScenarioVisitor, code,
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('then'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['then']))
     )
 
 
@@ -255,7 +257,7 @@ def test_allow_ifs_in_init_step():
     """
     assert_not_error(
         ScenarioVisitor, code,
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('init'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['init']))
     )
 
 
@@ -278,7 +280,9 @@ def test_allow_ifs_in_multiple_steps():
     """
     assert_not_error(
         ScenarioVisitor, code,
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('given,when,then'))
+        config=DefaultConfig(
+            allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['given', 'when', 'then'])
+        )
     )
 
 
@@ -296,7 +300,7 @@ def test_allow_ifs_in_multiple_steps_still_errors_in_others():
                 assert True
     """
     assert_error(ScenarioVisitor, code, StepHasBranching,
-                 config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('then')),
+                 config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['then'])),
                  step_name="given")
 
 
@@ -325,5 +329,5 @@ def test_allow_ifs_in_given_with_named_step():
     """
     assert_not_error(
         ScenarioVisitor, code,
-        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps('given'))
+        config=DefaultConfig(allow_ifs_in_steps=VedroScenarioStylePlugin.parse_allow_ifs_in_steps(['given']))
     )

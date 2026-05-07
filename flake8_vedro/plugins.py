@@ -114,7 +114,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allowed_interfaces_list=options.allowed_interfaces_list,
             allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
             allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes),
-            ignore_variables_pattern=cls._parse_ignore_variables_pattern(options.ignore_variables_pattern),
+            ignore_variables_pattern=cls.parse_ignore_variables_pattern(options.ignore_variables_pattern),
             allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps)
         )
 
@@ -132,7 +132,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             )
 
     @classmethod
-    def parse_allow_ifs_in_steps(cls, allow_ifs_in_steps: str | None) -> tuple | None:
+    def parse_allow_ifs_in_steps(cls, allow_ifs_in_steps: list[str] | None) -> tuple | None:
         if allow_ifs_in_steps is None:
             return tuple()
 
@@ -144,7 +144,7 @@ class VedroScenarioStylePlugin(PluginWithFilename):
         }
 
         allowed_step_prefixes = []
-        for step_key in allow_ifs_in_steps.split(","):
+        for step_key in allow_ifs_in_steps:
             allowed_step_prefixes.extend(prefix_map[step_key.strip()])
 
         return tuple(allowed_step_prefixes)
