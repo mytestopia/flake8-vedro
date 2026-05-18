@@ -8,7 +8,7 @@ from flake8_vedro.errors import ImportedInterfaceInWrongStep
 from flake8_vedro.helpers import (
     get_ast_name_node_name,
     get_imported_from_dir_functions,
-    unwrap_name_from_ast_node
+    unwrap_name_from_ast_node,
 )
 from flake8_vedro.types import FuncType
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor

@@ -4,11 +4,7 @@ from typing import List
 from flake8_plugin_utils import Error
 
 from flake8_vedro.abstract_checkers import ScenarioChecker
-from flake8_vedro.errors import (
-    SubjectDuplicated,
-    SubjectEmpty,
-    SubjectNotFound
-)
+from flake8_vedro.errors import SubjectDuplicated, SubjectEmpty, SubjectNotFound
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
 

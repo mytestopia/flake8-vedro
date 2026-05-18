@@ -126,6 +126,11 @@ class ScopeVarIsNotUsed(Error):
     message = 'scope variable "{name}" is not used'
 
 
+class StepHasBranching(Error):
+    code = 'VDR314'
+    message = 'step "{step_name}" should not have branching'
+
+
 class ContextWithoutAssert(Error):
     code = 'VDR400'
     message = 'context "{context_name}" does not have an assert'

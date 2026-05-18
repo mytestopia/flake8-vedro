@@ -1,11 +1,7 @@
 import ast
 from typing import List, Optional, Type
 
-from flake8_vedro.abstract_checkers import (
-    ScenarioChecker,
-    ScenarioHelper,
-    StepsChecker
-)
+from flake8_vedro.abstract_checkers import ScenarioChecker, ScenarioHelper, StepsChecker
 from flake8_vedro.config import Config
 from flake8_vedro.types import FuncType
 from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename

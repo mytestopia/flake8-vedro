@@ -28,6 +28,7 @@ allowed_interfaces_list = KafkaApi,SmthApi  # VDR302
 allow_partial_redefinitions_in_one_step = True # VDR312
 allow_unused_with_block_attributes = False  # VDR313
 ignore_variables_pattern = ^(log|history).*  # VDR313
+allow_ifs_in_steps = init,given  # VDR314
 ```
 
 ## Rules
@@ -59,7 +60,8 @@ ignore_variables_pattern = ^(log|history).*  # VDR313
 12. [VDR311. Scope variables should not be redefined](./flake8_vedro/rules/VDR311.md)
 13. [VDR312. Scope variables should not be partially redefined](./flake8_vedro/rules/VDR312.md)
 14. [VDR313. Scope variables should not be left unused](./flake8_vedro/rules/VDR313.md)
+15. [VDR314. Steps should not have branching](./flake8_vedro/rules/VDR314.md)
 
 
 ###  Contexts Rules
-15. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400md)
+16. [VDR400. Contexts should have specific assertions](./flake8_vedro/rules/VDR400.md)

@@ -13,6 +13,7 @@ from .errors import (
     StepAssertHasUselessAssert,
     StepAssertWithoutAssert,
     StepHasAssert,
+    StepHasBranching,
     StepInvalidName,
     StepsWrongOrder,
     StepThenDuplicated,
@@ -22,5 +23,5 @@ from .errors import (
     SubjectDuplicated,
     SubjectEmpty,
     SubjectIsNotParametrized,
-    SubjectNotFound
+    SubjectNotFound,
 )

@@ -37,7 +37,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.1.2'
+    version = '1.2.0'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
@@ -96,12 +96,17 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             parse_from_config=True,
             help='Regex pattern for variable names to ignore (rule VDR313)',
         )
+        option_manager.add_option(
+            '--allow-ifs-in-steps',
+            comma_separated_list=True,
+            parse_from_config=True,
+            help='List of steps where branching is allowed: init, given, when, then (rule VDR314)',
+        )
 
     @classmethod
     def parse_options_to_config(
         cls, option_manager: OptionManager, options: argparse.Namespace, args: List[str]
     ) -> Config:
-        cls._validate_ignore_variables_pattern(options.ignore_variables_pattern)
         return Config(
             is_context_assert_optional=str_to_bool(options.is_context_assert_optional),
             max_params_count=options.scenario_params_max_count,
@@ -109,18 +114,37 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allowed_interfaces_list=options.allowed_interfaces_list,
             allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
             allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes),
-            ignore_variables_pattern=options.ignore_variables_pattern
+            ignore_variables_pattern=cls.parse_ignore_variables_pattern(options.ignore_variables_pattern),
+            allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps)
         )
 
     @classmethod
-    def _validate_ignore_variables_pattern(cls, ignore_variables_pattern: str | None) -> None:
+    def parse_ignore_variables_pattern(cls, ignore_variables_pattern: str | None) -> re.Pattern | None:
         if ignore_variables_pattern is None:
-            return
+            return ignore_variables_pattern
 
         try:
-            re.compile(ignore_variables_pattern)
+            return re.compile(ignore_variables_pattern)
         except re.error as e:
             raise ValueError(
                 f"Invalid regex pattern for --ignore-variables-pattern: "
                 f"'{ignore_variables_pattern}' ({e})"
             )
+
+    @classmethod
+    def parse_allow_ifs_in_steps(cls, allow_ifs_in_steps: list[str] | None) -> tuple | None:
+        if allow_ifs_in_steps is None:
+            return tuple()
+
+        prefix_map = {
+            "init": ["__init__"],
+            "given": ["given"],
+            "when": ["when"],
+            "then": ["then", "and", "but"],
+        }
+
+        allowed_step_prefixes = []
+        for step_key in allow_ifs_in_steps:
+            allowed_step_prefixes.extend(prefix_map[step_key.strip()])
+
+        return tuple(allowed_step_prefixes)
