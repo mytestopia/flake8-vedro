@@ -21,6 +21,7 @@ from .errors import (
     StepWhenDuplicated,
     StepWhenNotFound,
     SubjectDuplicated,
+    SubjectDuplicatedAcrossScenarios,
     SubjectEmpty,
     SubjectIsNotParametrized,
     SubjectNotFound,

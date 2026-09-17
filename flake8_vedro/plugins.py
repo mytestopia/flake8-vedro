@@ -37,7 +37,7 @@ class PluginWithFilename(Plugin):
 
 class VedroScenarioStylePlugin(PluginWithFilename):
     name = 'flake8_vedro'
-    version = '1.2.0'
+    version = '1.3.0'
     visitors = [
         ScenarioVisitor,
         ContextVisitor
@@ -102,6 +102,14 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             parse_from_config=True,
             help='List of steps where branching is allowed: init, given, when, then (rule VDR314)',
         )
+        option_manager.add_option(
+            '--check-duplicate-subjects',
+            default='false',
+            type=str,
+            parse_from_config=True,
+            help='Check that subjects are unique across the scenarios/ tree '
+                 '(rule VDR110)',
+        )
 
     @classmethod
     def parse_options_to_config(
@@ -115,7 +123,8 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
             allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes),
             ignore_variables_pattern=cls.parse_ignore_variables_pattern(options.ignore_variables_pattern),
-            allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps)
+            allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps),
+            check_duplicate_subjects=str_to_bool(options.check_duplicate_subjects),
         )
 
     @classmethod
