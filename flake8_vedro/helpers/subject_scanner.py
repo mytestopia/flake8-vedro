@@ -66,12 +66,15 @@ class SubjectsMap:
             return None
 
         occurrences = self._occurrences.get(subject.value, [])
-        current = Occurrence(os.path.abspath(filename), subject.lineno)
+        current = os.path.abspath(filename)
 
+        # A file is one scenario: vedro collects scenarios from the module
+        # namespace, so of several `Scenario` classes only the last one runs.
         # Not in the map means the file on disk differs from the tree flake8
         # parsed (stdin, or an unsaved editor buffer) - nothing to compare with.
-        # The line number tells apart several scenarios of one file.
-        if current not in occurrences or current == occurrences[0]:
+        if all(occurrence.path != current for occurrence in occurrences):
+            return None
+        if occurrences[0].path == current:
             return None
         return occurrences[0]
 

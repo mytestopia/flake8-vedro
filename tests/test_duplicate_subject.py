@@ -92,7 +92,9 @@ def test_every_duplicated_subject_is_reported(scenarios_tree):
         _assert_error(path, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
-def test_duplicated_subject_in_one_file(scenarios_tree):
+def test_same_subject_in_one_file_is_not_reported(scenarios_tree):
+    # vedro runs only the last `Scenario` class of a module, so it is not a
+    # duplicate in the report
     path = write(scenarios_tree / 'scenarios/a.py', '''
     class Scenario:
         subject = 'register user'
@@ -101,7 +103,7 @@ def test_duplicated_subject_in_one_file(scenarios_tree):
     class Scenario:
         subject = 'register user'
     ''')
-    _assert_error(path, CONFIG, first_file='scenarios/a.py', first_lineno=3)
+    _assert_not_error(path, CONFIG)
 
 
 def test_different_parametrization_placeholders(scenarios_tree):
@@ -218,13 +220,23 @@ def test_file_with_syntax_error_is_skipped(scenarios_tree):
     _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
-def test_subject_moved_in_an_unsaved_file_is_skipped(scenarios_tree):
+def test_subject_changed_in_an_unsaved_file_is_skipped(scenarios_tree):
     # flake8 can be given a tree that differs from the file on disk (stdin, an
     # unsaved editor buffer): there is nothing reliable to compare, so be quiet
+    _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'login user')
+    changed = ast.parse("class Scenario:\n    subject = 'register user'\n")
+
+    visitor = ScenarioVisitor(config=CONFIG, filename=str(b))
+    visitor.visit(changed)
+    assert not visitor.errors
+
+
+def test_subject_moved_in_an_unsaved_file_is_reported_at_its_line(scenarios_tree):
     _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
     b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
     moved = ast.parse("\n\n\nclass Scenario:\n    subject = 'register user'\n")
 
     visitor = ScenarioVisitor(config=CONFIG, filename=str(b))
     visitor.visit(moved)
-    assert not visitor.errors
+    assert [error.lineno for error in visitor.errors] == [5]
