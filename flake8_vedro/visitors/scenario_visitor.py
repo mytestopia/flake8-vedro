@@ -2,6 +2,7 @@ import ast
 from typing import List, Optional, Type
 
 from flake8_vedro.abstract_checkers import ScenarioChecker, ScenarioHelper, StepsChecker
+from flake8_vedro.abstract_checkers.scenario_helper import SCENARIO_CLASS_NAME
 from flake8_vedro.config import Config
 from flake8_vedro.types import FuncType
 from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
@@ -10,11 +11,13 @@ from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
 class Context:
     def __init__(self, steps: List[FuncType], scenario_node: ast.ClassDef,
                  import_from_nodes: List[ast.ImportFrom],
-                 filename: str):
+                 filename: str,
+                 scenarios_root: Optional[str] = None):
         self.steps = steps
         self.scenario_node = scenario_node
         self.import_from_nodes = import_from_nodes
         self.filename = filename
+        self.scenarios_root = scenarios_root
 
 
 class ScenarioVisitor(VisitorWithFilename):
@@ -26,6 +29,8 @@ class ScenarioVisitor(VisitorWithFilename):
                  filename: Optional[str] = None) -> None:
         super().__init__(config, filename)
         self.import_from_nodes = []
+        # the same for every scenario in the file, so resolved once
+        self.scenarios_root = ScenarioHelper().get_scenarios_root(filename) if filename else None
 
     @property
     def config(self):
@@ -53,11 +58,12 @@ class ScenarioVisitor(VisitorWithFilename):
         cls.scenarios_checkers = []
 
     def visit_ClassDef(self, node: ast.ClassDef):
-        if node.name == 'Scenario':
+        if node.name == SCENARIO_CLASS_NAME:
             context = Context(steps=ScenarioHelper().get_all_steps(node),
                               scenario_node=node,
                               import_from_nodes=self.import_from_nodes,
-                              filename=self.filename)
+                              filename=self.filename,
+                              scenarios_root=self.scenarios_root)
             try:
                 for checker in self.steps_checkers:
                     self.errors.extend(checker.check_steps(context, self.config))

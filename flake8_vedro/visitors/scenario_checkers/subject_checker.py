@@ -1,4 +1,3 @@
-import ast
 from typing import List
 
 from flake8_plugin_utils import Error
@@ -30,7 +29,6 @@ class SubjectEmptyChecker(ScenarioChecker):
 
     def check_scenario(self, context: Context, *args) -> List[Error]:
         subject = self.get_subject(context.scenario_node)
-        if subject and isinstance(subject.value, ast.Constant):
-            if not subject.value.value:
-                return [SubjectEmpty(subject.lineno, subject.col_offset)]
+        if subject and subject.value == '':
+            return [SubjectEmpty(subject.lineno, subject.col_offset)]
         return []

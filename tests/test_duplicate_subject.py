@@ -5,7 +5,7 @@ import pytest
 
 from flake8_vedro.config import DefaultConfig
 from flake8_vedro.errors import SubjectDuplicatedAcrossScenarios
-from flake8_vedro.helpers.subject_scanner import clear_cache
+from flake8_vedro.helpers.subject_scanner import SubjectsMap
 from flake8_vedro.visitors import ScenarioVisitor
 from flake8_vedro.visitors.scenario_checkers import DuplicateSubjectChecker
 
@@ -16,8 +16,7 @@ from flake8_vedro.visitors.scenario_checkers import DuplicateSubjectChecker
 # to recognise its own occurrence. _assert_error and _assert_not_error below
 # mirror their contract (single error, type check, exact message) on a path.
 
-CONFIG_ON = DefaultConfig(check_duplicate_subjects=True)
-CONFIG_OFF = DefaultConfig()
+CONFIG = DefaultConfig()
 
 
 @pytest.fixture(autouse=True)
@@ -25,15 +24,22 @@ def scenarios_tree(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(DuplicateSubjectChecker)
-    clear_cache()
+    SubjectsMap.clear_cache()
     yield tmp_path
-    clear_cache()
+    SubjectsMap.clear_cache()
 
 
 def write(path, code):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(textwrap.dedent(code))
     return path
+
+
+def _create_scenario(scenarios_tree, path, subject):
+    return write(scenarios_tree / path, f'''
+    class Scenario:
+        subject = {subject!r}
+    ''')
 
 
 def _errors(path, config):
@@ -56,68 +62,34 @@ def _assert_not_error(path, config):
     assert not errors, f'unexpected error in {path}: {[e.message for e in errors]}'
 
 
-def test_check_is_disabled_by_default(scenarios_tree):
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_OFF)
-    _assert_not_error(b, CONFIG_OFF)
-
-
 def test_unique_subjects(scenarios_tree):
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'login user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_not_error(b, CONFIG_ON)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'login user')
+    _assert_not_error(a, CONFIG)
+    _assert_not_error(b, CONFIG)
 
 
 def test_duplicated_subject(scenarios_tree):
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_error(b, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_first_subject_by_sorted_path_is_not_reported(scenarios_tree):
     # written in reverse order: the report should not depend on it
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_error(b, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_every_duplicated_subject_is_reported(scenarios_tree):
-    paths = [write(scenarios_tree / f'scenarios/{name}.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''') for name in ('a', 'b', 'c')]
+    paths = [_create_scenario(scenarios_tree, f'scenarios/{name}.py', 'register user') for name in ('a', 'b', 'c')]
 
-    _assert_not_error(paths[0], CONFIG_ON)
+    _assert_not_error(paths[0], CONFIG)
     for path in paths[1:]:
-        _assert_error(path, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+        _assert_error(path, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_duplicated_subject_in_one_file(scenarios_tree):
@@ -129,33 +101,42 @@ def test_duplicated_subject_in_one_file(scenarios_tree):
     class Scenario:
         subject = 'register user'
     ''')
-    _assert_error(path, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    _assert_error(path, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_different_parametrization_placeholders(scenarios_tree):
-    error = write(scenarios_tree / 'scenarios/get_names_by_error.py', '''
-    class Scenario:
-        subject = 'get names with {error}'
-    ''')
-    locale = write(scenarios_tree / 'scenarios/get_names_by_locale.py', '''
-    class Scenario:
-        subject = 'get names with {locale}'
-    ''')
-    _assert_not_error(error, CONFIG_ON)
-    _assert_not_error(locale, CONFIG_ON)
+    error = _create_scenario(scenarios_tree, 'scenarios/get_names_by_error.py', 'get names with {error}')
+    locale = _create_scenario(scenarios_tree, 'scenarios/get_names_by_locale.py', 'get names with {locale}')
+    _assert_not_error(error, CONFIG)
+    _assert_not_error(locale, CONFIG)
 
 
 def test_same_parametrization_template(scenarios_tree):
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'get names with {error}'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'get names with {error}'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_error(b, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'get names with {error}')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'get names with {error}')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
+
+
+@pytest.mark.parametrize('subject', [
+    'delete reaction on {subject} photo by author',
+    '{subject}',
+    '{subject.name} with {error}',
+])
+def test_subject_placeholder_is_not_compared(scenarios_tree, subject):
+    # {subject} is filled from params, so equal templates give different subjects
+    paths = [_create_scenario(scenarios_tree, f'scenarios/{name}.py', subject)
+             for name in ('a', 'b', 'c')]
+
+    for path in paths:
+        _assert_not_error(path, CONFIG)
+
+
+def test_placeholder_similar_to_subject_is_compared(scenarios_tree):
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'get {subject_id} photo')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'get {subject_id} photo')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 @pytest.mark.parametrize('subject', [
@@ -168,38 +149,23 @@ def test_subject_is_not_a_string_literal(scenarios_tree, subject):
     class Scenario:
         subject = {subject}
     ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_not_error(b, CONFIG_ON)
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_not_error(b, CONFIG)
 
 
 def test_scenario_outside_scenarios_folder(scenarios_tree):
-    inside = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    outside = write(scenarios_tree / 'not_scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(inside, CONFIG_ON)
-    _assert_not_error(outside, CONFIG_ON)
+    inside = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    outside = _create_scenario(scenarios_tree, 'not_scenarios/b.py', 'register user')
+    _assert_not_error(inside, CONFIG)
+    _assert_not_error(outside, CONFIG)
 
 
 def test_another_scenarios_folder_is_another_namespace(scenarios_tree):
-    first = write(scenarios_tree / 'service_a/scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    second = write(scenarios_tree / 'service_b/scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(first, CONFIG_ON)
-    _assert_not_error(second, CONFIG_ON)
+    first = _create_scenario(scenarios_tree, 'service_a/scenarios/a.py', 'register user')
+    second = _create_scenario(scenarios_tree, 'service_b/scenarios/a.py', 'register user')
+    _assert_not_error(first, CONFIG)
+    _assert_not_error(second, CONFIG)
 
 
 def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
@@ -210,16 +176,10 @@ def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
         class Scenario:
             subject = 'register user'
     ''')
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_error(b, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_scenario_nested_in_function_is_the_first_subject(scenarios_tree):
@@ -230,12 +190,9 @@ def test_scenario_nested_in_function_is_the_first_subject(scenarios_tree):
             subject = 'register user'
         return Scenario
     ''')
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(nested, CONFIG_ON)
-    _assert_error(a, CONFIG_ON, first_file='scenarios/A_nested.py', first_lineno=4)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    _assert_not_error(nested, CONFIG)
+    _assert_error(a, CONFIG, first_file='scenarios/A_nested.py', first_lineno=4)
 
 
 def test_unparsable_class_body_does_not_break_the_check(scenarios_tree):
@@ -244,16 +201,10 @@ def test_unparsable_class_body_does_not_break_the_check(scenarios_tree):
         FIRST, SECOND = 1, 2
         subject = 'get names'
     ''')
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_error(b, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_file_with_syntax_error_is_skipped(scenarios_tree):
@@ -261,31 +212,19 @@ def test_file_with_syntax_error_is_skipped(scenarios_tree):
     class Scenario
         subject = 'register user'
     ''')
-    a = write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    _assert_not_error(a, CONFIG_ON)
-    _assert_error(b, CONFIG_ON, first_file='scenarios/a.py', first_lineno=3)
+    a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
 
 
 def test_subject_moved_in_an_unsaved_file_is_skipped(scenarios_tree):
     # flake8 can be given a tree that differs from the file on disk (stdin, an
     # unsaved editor buffer): there is nothing reliable to compare, so be quiet
-    write(scenarios_tree / 'scenarios/a.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
-    b = write(scenarios_tree / 'scenarios/b.py', '''
-    class Scenario:
-        subject = 'register user'
-    ''')
+    _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
     moved = ast.parse("\n\n\nclass Scenario:\n    subject = 'register user'\n")
 
-    visitor = ScenarioVisitor(config=CONFIG_ON, filename=str(b))
+    visitor = ScenarioVisitor(config=CONFIG, filename=str(b))
     visitor.visit(moved)
     assert not visitor.errors

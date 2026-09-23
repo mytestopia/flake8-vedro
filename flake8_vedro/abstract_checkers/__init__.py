@@ -1,4 +1,4 @@
 from .context_checker import ContextChecker
 from .scenario_checker import ScenarioChecker
-from .scenario_helper import ScenarioHelper
+from .scenario_helper import ScenarioHelper, Subject
 from .step_checker import StepsChecker

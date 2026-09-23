@@ -1,81 +1,83 @@
 import ast
 import os
-import pathlib
-from typing import Dict, Iterator, List, Optional, Tuple
+import re
+import string
+from typing import Dict, Iterator, List, NamedTuple, Optional
 
-SCENARIOS_FOLDER = 'scenarios'
+from flake8_vedro.abstract_checkers.scenario_helper import (
+    SCENARIO_CLASS_NAME,
+    ScenarioHelper,
+    Subject,
+)
 
 # Directories that never contain scenarios and only slow the walk down
 # (dot-directories are pruned separately).
 PRUNED_DIRS = {'__pycache__', 'node_modules'}
 
-# subject value -> [(absolute file path, lineno)], sorted
-SubjectMap = Dict[str, List[Tuple[str, int]]]
 
-# scenarios root -> subject map, built once per process per root
-_cache: Dict[str, SubjectMap] = {}
+def is_comparable(value: str) -> bool:
+    """Tell whether a subject template can be compared with other ones.
 
-
-def get_scenarios_root(filename: str) -> Optional[str]:
-    """Return the outermost "scenarios" directory containing `filename`.
-
-    The scan is scoped to this directory, not to the current working directory,
-    so that the subject namespace matches the vedro project the file belongs to:
-    a vendored or excluded copy of a scenarios tree, or a sibling service in a
-    monorepo, is a different root and never collides with this one.
+    A `{subject}` placeholder means the scenario takes (a part of) its subject
+    from params, so equal templates like 'delete {subject} photo' or '{subject}'
+    in different scenarios do not mean equal subjects.
     """
-    path = pathlib.Path(os.path.abspath(filename))
-    roots = [str(parent) for parent in path.parents if parent.name == SCENARIOS_FOLDER]
-    return roots[-1] if roots else None
+    try:
+        fields = [field for _, field, _, _ in string.Formatter().parse(value) if field]
+    except ValueError:  # malformed template, e.g. an unbalanced brace
+        return True
+    # {subject.name} and {subject[0]} are still the subject param
+    return not any(re.match(r'subject\b', field) for field in fields)
 
 
-def get_literal_subject(class_node: ast.ClassDef) -> Optional[Tuple[str, int, int]]:
-    """Return (value, lineno, col_offset) of the first literal string subject.
+class Occurrence(NamedTuple):
+    path: str  # absolute
+    lineno: int
 
-    Returns None if the scenario has no subject, or if its first subject is not
-    a string literal. Only the first `subject` assignment counts, the rest are
-    VDR106's business.
 
-    Deliberately does not reuse ScenarioHelper.get_subjects: the scanner reads
-    every file in the tree, so it must not raise on a class body it does not
-    understand (e.g. `A, B = 1, 2`).
+class SubjectsMap:
+    """Literal subjects of every scenario under a scenarios root.
+
+    Occurrences of a subject are sorted, so the first one is a deterministic
+    "original" regardless of which process builds the map. Maps are cached per
+    process per root, use `for_root` to get one.
     """
-    for element in class_node.body:
-        if not isinstance(element, ast.Assign):
-            continue
-        target = element.targets[0]
-        if not isinstance(target, ast.Name) or target.id != 'subject':
-            continue
 
-        value = element.value
-        if isinstance(value, ast.Constant) and isinstance(value.value, str):
-            return value.value, element.lineno, element.col_offset
-        return None
-    return None
+    _cache: Dict[str, 'SubjectsMap'] = {}
+
+    def __init__(self, root: str) -> None:
+        self._occurrences = _scan(root)
+
+    @classmethod
+    def for_root(cls, root: str) -> 'SubjectsMap':
+        key = os.path.abspath(root)
+        if key not in cls._cache:
+            cls._cache[key] = cls(key)
+        return cls._cache[key]
+
+    @classmethod
+    def clear_cache(cls) -> None:
+        """Drop the cached maps (used by tests)."""
+        cls._cache.clear()
+
+    def find_original(self, filename: str, subject: Subject) -> Optional[Occurrence]:
+        """Return the original occurrence if `subject` in `filename` duplicates it."""
+        if subject.value is None or not is_comparable(subject.value):
+            return None
+
+        occurrences = self._occurrences.get(subject.value, [])
+        current = Occurrence(os.path.abspath(filename), subject.lineno)
+
+        # Not in the map means the file on disk differs from the tree flake8
+        # parsed (stdin, or an unsaved editor buffer) - nothing to compare with.
+        # The line number tells apart several scenarios of one file.
+        if current not in occurrences or current == occurrences[0]:
+            return None
+        return occurrences[0]
 
 
-def collect_subjects(root: str) -> SubjectMap:
-    """Return {subject: [(file, lineno)]} for every scenario under `root`.
-
-    Occurrences are sorted, so the first one is a deterministic "primary"
-    regardless of which process builds the map. Results are cached per process
-    per root; call `clear_cache` to reset (used by tests).
-    """
-    key = os.path.abspath(root)
-    cached = _cache.get(key)
-    if cached is None:
-        cached = _scan(key)
-        _cache[key] = cached
-    return cached
-
-
-def clear_cache() -> None:
-    """Drop the cached subject maps (used by tests)."""
-    _cache.clear()
-
-
-def _scan(root: str) -> SubjectMap:
-    result: SubjectMap = {}
+def _scan(root: str) -> Dict[str, List[Occurrence]]:
+    result: Dict[str, List[Occurrence]] = {}
 
     for dirpath, dirnames, filenames in os.walk(root):
         # prune in place so os.walk does not descend into them
@@ -84,15 +86,15 @@ def _scan(root: str) -> SubjectMap:
             if not name.endswith('.py'):
                 continue
             path = os.path.join(dirpath, name)
-            for value, lineno, _ in _subjects_in_file(path):
-                result.setdefault(value, []).append((path, lineno))
+            for subject in _subjects_in_file(path):
+                result.setdefault(subject.value, []).append(Occurrence(path, subject.lineno))
 
     for occurrences in result.values():
         occurrences.sort()
     return result
 
 
-def _subjects_in_file(path: str) -> List[Tuple[str, int, int]]:
+def _subjects_in_file(path: str) -> List[Subject]:
     try:
         with open(path, encoding='utf-8') as handle:
             tree = ast.parse(handle.read(), filename=path)
@@ -101,8 +103,9 @@ def _subjects_in_file(path: str) -> List[Tuple[str, int, int]]:
 
     found = []
     for class_node in _find_scenario_nodes(tree):
-        subject = get_literal_subject(class_node)
-        if subject is not None:
+        # only the first subject counts, the rest are VDR106's business
+        subject = ScenarioHelper().get_subject(class_node)
+        if subject is not None and subject.value is not None and is_comparable(subject.value):
             found.append(subject)
     return found
 
@@ -112,12 +115,12 @@ def _find_scenario_nodes(node: ast.AST) -> Iterator[ast.ClassDef]:
 
     ScenarioVisitor.visit_ClassDef does not call generic_visit, so traversal
     stops at every class: a Scenario nested in another class is never checked
-    and must not end up in the map either, or it would become a primary that
+    and must not end up in the map either, or it would become an original that
     can never be reported.
     """
     for child in ast.iter_child_nodes(node):
         if isinstance(child, ast.ClassDef):
-            if child.name == 'Scenario':
+            if child.name == SCENARIO_CLASS_NAME:
                 yield child
         else:
             yield from _find_scenario_nodes(child)

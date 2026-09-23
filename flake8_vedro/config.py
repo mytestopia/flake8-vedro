@@ -11,8 +11,7 @@ class Config:
                  allow_partial_redefinitions_in_one_step: bool,
                  allow_unused_with_block_attributes: bool,
                  ignore_variables_pattern: Optional[re.Pattern],
-                 allow_ifs_in_steps: Optional[tuple[str]] = None,
-                 check_duplicate_subjects: bool = False):
+                 allow_ifs_in_steps: Optional[tuple[str]] = None):
         self.is_context_assert_optional = is_context_assert_optional
         self.max_params_count = max_params_count
         self.allowed_to_redefine_list = allowed_to_redefine_list or []
@@ -21,7 +20,6 @@ class Config:
         self.allow_unused_with_block_attributes = allow_unused_with_block_attributes
         self.ignore_variables_pattern = ignore_variables_pattern
         self.allow_ifs_in_steps = allow_ifs_in_steps or tuple()
-        self.check_duplicate_subjects = check_duplicate_subjects
 
 
 class DefaultConfig(Config):
@@ -33,8 +31,7 @@ class DefaultConfig(Config):
                  allow_partial_redefinitions_in_one_step: bool = False,
                  allow_unused_with_block_attributes: bool = True,
                  ignore_variables_pattern: Optional[re.Pattern] = None,
-                 allow_ifs_in_steps: Optional[tuple[str]] = None,
-                 check_duplicate_subjects: bool = False):
+                 allow_ifs_in_steps: Optional[tuple[str]] = None):
         super().__init__(
             is_context_assert_optional=is_context_assert_optional,
             max_params_count=max_params_count,
@@ -43,6 +40,5 @@ class DefaultConfig(Config):
             allow_partial_redefinitions_in_one_step=allow_partial_redefinitions_in_one_step,
             allow_unused_with_block_attributes=allow_unused_with_block_attributes,
             ignore_variables_pattern=ignore_variables_pattern,
-            allow_ifs_in_steps=allow_ifs_in_steps,
-            check_duplicate_subjects=check_duplicate_subjects,
+            allow_ifs_in_steps=allow_ifs_in_steps
         )

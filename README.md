@@ -22,7 +22,6 @@ Some rules in linter should be configurated:
 ```editorconfig
 [flake8]
 scenario_params_max_count = 8  # VDR109
-check_duplicate_subjects = False  # VDR110
 allowed_to_redefine_list = page,page2  # VDR311
 is_context_assert_optional = true     # VDR400
 allowed_interfaces_list = KafkaApi,SmthApi  # VDR302
