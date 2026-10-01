@@ -29,14 +29,14 @@ def scenarios_tree(tmp_path, monkeypatch):
     SubjectsMap.clear_cache()
 
 
-def write(path, code):
+def _write(path, code):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(textwrap.dedent(code))
     return path
 
 
 def _create_scenario(scenarios_tree, path, subject):
-    return write(scenarios_tree / path, f'''
+    return _write(scenarios_tree / path, f'''
     class Scenario:
         subject = {subject!r}
     ''')
@@ -95,7 +95,7 @@ def test_every_duplicated_subject_is_reported(scenarios_tree):
 def test_same_subject_in_one_file_is_not_reported(scenarios_tree):
     # vedro runs only the last `Scenario` class of a module, so it is not a
     # duplicate in the report
-    path = write(scenarios_tree / 'scenarios/a.py', '''
+    path = _write(scenarios_tree / 'scenarios/a.py', '''
     class Scenario:
         subject = 'register user'
 
@@ -147,7 +147,7 @@ def test_placeholder_similar_to_subject_is_compared(scenarios_tree):
     "'register' + ' user'",
 ])
 def test_subject_is_not_a_string_literal(scenarios_tree, subject):
-    a = write(scenarios_tree / 'scenarios/a.py', f'''
+    a = _write(scenarios_tree / 'scenarios/a.py', f'''
     class Scenario:
         subject = {subject}
     ''')
@@ -173,7 +173,7 @@ def test_another_scenarios_folder_is_another_namespace(scenarios_tree):
 def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
     # ScenarioVisitor never checks a Scenario nested in another class, so such a
     # scenario must not become the first occurrence: it could never be reported
-    write(scenarios_tree / 'scenarios/A_nested.py', '''
+    _write(scenarios_tree / 'scenarios/A_nested.py', '''
     class Outer:
         class Scenario:
             subject = 'register user'
@@ -186,7 +186,7 @@ def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
 
 def test_scenario_nested_in_function_is_the_first_subject(scenarios_tree):
     # ScenarioVisitor does check it, so it must be in the map
-    nested = write(scenarios_tree / 'scenarios/A_nested.py', '''
+    nested = _write(scenarios_tree / 'scenarios/A_nested.py', '''
     def make_scenario():
         class Scenario:
             subject = 'register user'
@@ -197,20 +197,22 @@ def test_scenario_nested_in_function_is_the_first_subject(scenarios_tree):
     _assert_error(a, CONFIG, first_file='scenarios/A_nested.py', first_lineno=4)
 
 
-def test_unparsable_class_body_does_not_break_the_check(scenarios_tree):
-    write(scenarios_tree / 'scenarios/A_unparsable.py', '''
+def test_other_class_attributes_do_not_hide_the_subject(scenarios_tree):
+    # a tuple target like `FIRST, SECOND = 1, 2` has no .id, it must neither
+    # break the scan nor make the scanner skip the scenario
+    _write(scenarios_tree / 'scenarios/A_attributes.py', '''
     class Scenario:
         FIRST, SECOND = 1, 2
-        subject = 'get names'
+        tags = ['smoke']
+        env = 'prod'
+        subject = 'register user'
     ''')
     a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
-    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
-    _assert_not_error(a, CONFIG)
-    _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
+    _assert_error(a, CONFIG, first_file='scenarios/A_attributes.py', first_lineno=6)
 
 
 def test_file_with_syntax_error_is_skipped(scenarios_tree):
-    write(scenarios_tree / 'scenarios/A_broken.py', '''
+    _write(scenarios_tree / 'scenarios/A_broken.py', '''
     class Scenario
         subject = 'register user'
     ''')

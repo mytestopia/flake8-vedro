@@ -30,7 +30,7 @@ class DuplicateSubjectChecker(ScenarioChecker):
         if subject is None:
             return []
 
-        original = SubjectsMap.for_root(context.scenarios_root).find_original(context.filename, subject)
+        original = SubjectsMap.for_root(context.scenarios_root).find_duplicate_original(context.filename, subject)
         if original is None:
             return []
 
