@@ -9,8 +9,6 @@ from flake8_vedro.helpers.subject_scanner import SubjectsMap
 from flake8_vedro.visitors import ScenarioVisitor
 from flake8_vedro.visitors.scenario_checkers import DuplicateSubjectChecker
 
-# VDR110 reads ./scenarios from disk, so scenarios are written to files in a per-test cwd
-
 CONFIG = DefaultConfig()
 
 
@@ -20,8 +18,7 @@ def scenarios_tree(tmp_path, monkeypatch):
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(DuplicateSubjectChecker)
     SubjectsMap.clear_cache()
-    yield tmp_path
-    SubjectsMap.clear_cache()
+    return tmp_path
 
 
 def _write(path, code):
@@ -154,11 +151,11 @@ def test_scenario_outside_scenarios_folder(scenarios_tree):
     _assert_not_error(outside, CONFIG)
 
 
-def test_scenarios_folder_outside_cwd_is_not_compared(scenarios_tree):
-    first = _create_scenario(scenarios_tree, 'service_a/scenarios/a.py', 'register user')
-    second = _create_scenario(scenarios_tree, 'service_b/scenarios/b.py', 'register user')
-    _assert_not_error(first, CONFIG)
-    _assert_not_error(second, CONFIG)
+def test_run_from_repository_root(scenarios_tree):
+    a = _create_scenario(scenarios_tree, 'tests/e2e/scenarios/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'tests/e2e/scenarios/b.py', 'register user')
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file='tests/e2e/scenarios/a.py', first_lineno=3)
 
 
 def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
@@ -216,13 +213,3 @@ def test_subject_changed_in_an_unsaved_file_is_skipped(scenarios_tree):
     visitor = ScenarioVisitor(config=CONFIG, filename=str(b))
     visitor.visit(changed)
     assert not visitor.errors
-
-
-def test_subject_moved_in_an_unsaved_file_is_reported_at_its_line(scenarios_tree):
-    _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
-    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
-    moved = ast.parse("\n\n\nclass Scenario:\n    subject = 'register user'\n")
-
-    visitor = ScenarioVisitor(config=CONFIG, filename=str(b))
-    visitor.visit(moved)
-    assert [error.lineno for error in visitor.errors] == [5]

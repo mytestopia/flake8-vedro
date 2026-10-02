@@ -1,5 +1,6 @@
 import ast
 import os
+import pathlib
 import re
 import string
 from typing import Dict, Iterator, List, NamedTuple, Optional
@@ -10,8 +11,6 @@ from flake8_vedro.abstract_checkers.scenario_helper import (
     ScenarioHelper,
     Subject,
 )
-
-PRUNED_DIRS = {'__pycache__', 'node_modules'}
 
 
 def is_comparable_subject(value: str) -> bool:
@@ -33,18 +32,19 @@ class Occurrence(NamedTuple):
 
 class SubjectsMap:
     """
-    Subjects of all scenarios in ./scenarios, built once per process
+    Subjects of all scenarios in a scenarios folder, built once per process
     """
 
     _cache: Optional['SubjectsMap'] = None
 
-    def __init__(self) -> None:
-        self._occurrences = _scan(SCENARIOS_FOLDER)
+    def __init__(self, root: str) -> None:
+        self.root = root
+        self._occurrences = _scan(root)
 
     @classmethod
-    def get(cls) -> 'SubjectsMap':
-        if cls._cache is None:
-            cls._cache = cls()
+    def for_root(cls, root: str) -> 'SubjectsMap':
+        if cls._cache is None or cls._cache.root != root:
+            cls._cache = cls(root)
         return cls._cache
 
     @classmethod
@@ -62,7 +62,7 @@ class SubjectsMap:
         current = os.path.relpath(filename)
 
         # vedro runs only the last Scenario of a module, so a file is one scenario.
-        # Not found: file is outside ./scenarios or differs from the one on disk
+        # Not found: file differs from the one on disk (stdin, unsaved editor buffer)
         if all(occurrence.path != current for occurrence in occurrences):
             return None
         if occurrences[0].path == current:
@@ -70,11 +70,19 @@ class SubjectsMap:
         return occurrences[0]
 
 
+def find_scenarios_root(filename: str) -> Optional[str]:
+    """
+    Return the outermost scenarios folder containing filename, relative to cwd
+    """
+    path = pathlib.Path(os.path.abspath(filename))
+    roots = [parent for parent in path.parents if parent.name == SCENARIOS_FOLDER]
+    return os.path.relpath(roots[-1]) if roots else None
+
+
 def _scan(root: str) -> Dict[str, List[Occurrence]]:
     result: Dict[str, List[Occurrence]] = {}
 
-    for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in PRUNED_DIRS and not d.startswith('.')]
+    for dirpath, _, filenames in os.walk(root):
         for name in filenames:
             if not name.endswith('.py'):
                 continue
