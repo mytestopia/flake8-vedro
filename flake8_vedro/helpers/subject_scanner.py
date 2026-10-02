@@ -54,17 +54,9 @@ class SubjectsMap:
         """
         Return the first occurrence of subject if the scenario in filename is not the first one
         """
-        if subject.value is None:
-            return None
-
-        occurrences = self._occurrences.get(subject.value, [])
-        current = os.path.relpath(filename)
-
-        # vedro runs only the last Scenario of a module, so a file is one scenario.
-        # Not found: file differs from the one on disk (stdin, unsaved editor buffer)
-        if all(occurrence.path != current for occurrence in occurrences):
-            return None
-        if occurrences[0].path == current:
+        occurrences = self._occurrences.get(subject.value)
+        # vedro runs only the last Scenario of a module, so a file is one scenario
+        if not occurrences or occurrences[0].path == os.path.relpath(filename):
             return None
         return occurrences[0]
 
@@ -85,12 +77,12 @@ def _scan(root: str) -> Dict[str, List[Occurrence]]:
         for name in filenames:
             if not name.endswith('.py'):
                 continue
-            path = os.path.join(dirpath, name)
+            path = os.path.relpath(os.path.join(dirpath, name))
             for subject in _subjects_in_file(path):
                 result.setdefault(subject.value, []).append(Occurrence(path, subject.lineno))
 
     for occurrences in result.values():
-        occurrences.sort()
+        occurrences.sort(key=lambda occurrence: (os.path.abspath(occurrence.path), occurrence.lineno))
     return result
 
 

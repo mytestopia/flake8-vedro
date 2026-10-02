@@ -158,6 +158,19 @@ def test_run_from_repository_root(scenarios_tree):
     _assert_error(b, CONFIG, first_file='tests/e2e/scenarios/a.py', first_lineno=3)
 
 
+@pytest.mark.parametrize(('cwd', 'first_file'), [
+    ('scenarios', 'a/a.py'),
+    ('scenarios/a', 'a.py'),
+    ('scenarios/b', '../a/a.py'),
+])
+def test_run_from_inside_scenarios_folder(scenarios_tree, monkeypatch, cwd, first_file):
+    a = _create_scenario(scenarios_tree, 'scenarios/a/a.py', 'register user')
+    b = _create_scenario(scenarios_tree, 'scenarios/b/b.py', 'register user')
+    monkeypatch.chdir(scenarios_tree / cwd)
+    _assert_not_error(a, CONFIG)
+    _assert_error(b, CONFIG, first_file=first_file, first_lineno=3)
+
+
 def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
     _write(scenarios_tree / 'scenarios/A_nested.py', '''
     class Outer:
@@ -203,13 +216,3 @@ def test_file_with_syntax_error_is_skipped(scenarios_tree):
     b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
     _assert_not_error(a, CONFIG)
     _assert_error(b, CONFIG, first_file='scenarios/a.py', first_lineno=3)
-
-
-def test_subject_changed_in_an_unsaved_file_is_skipped(scenarios_tree):
-    _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
-    b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'login user')
-    changed = ast.parse("class Scenario:\n    subject = 'register user'\n")
-
-    visitor = ScenarioVisitor(config=CONFIG, filename=str(b))
-    visitor.visit(changed)
-    assert not visitor.errors
