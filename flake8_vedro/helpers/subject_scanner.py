@@ -6,74 +6,63 @@ from typing import Dict, Iterator, List, NamedTuple, Optional
 
 from flake8_vedro.abstract_checkers.scenario_helper import (
     SCENARIO_CLASS_NAME,
+    SCENARIOS_FOLDER,
     ScenarioHelper,
     Subject,
 )
 
-# Directories that never contain scenarios and only slow the walk down
-# (dot-directories are pruned separately).
 PRUNED_DIRS = {'__pycache__', 'node_modules'}
 
 
 def is_comparable_subject(value: str) -> bool:
-    """Tell whether a subject template can be compared with other ones.
-
-    A `{subject}` placeholder means the scenario takes (a part of) its subject
-    from params, so equal templates like 'delete {subject} photo' or '{subject}'
-    in different scenarios do not mean equal subjects.
+    """
+    Subject with {subject} placeholder takes its value from params, so it can't be compared
     """
     try:
         fields = [field for _, field, _, _ in string.Formatter().parse(value) if field]
     except ValueError:  # malformed template, e.g. an unbalanced brace
         return True
-    # {subject.name} and {subject[0]} are still the subject param
+    # also {subject.name} and {subject[0]}
     return not any(re.match(r'subject\b', field) for field in fields)
 
 
 class Occurrence(NamedTuple):
-    path: str  # absolute
+    path: str
     lineno: int
 
 
 class SubjectsMap:
-    """Literal subjects of every scenario under a scenarios root.
-
-    Occurrences of a subject are sorted, so the first one is a deterministic
-    "original" regardless of which process builds the map. Maps are cached per
-    process per root, use `for_root` to get one.
+    """
+    Subjects of all scenarios in ./scenarios, built once per process
     """
 
-    _cache: Dict[str, 'SubjectsMap'] = {}
+    _cache: Optional['SubjectsMap'] = None
 
-    def __init__(self, root: str) -> None:
-        self._occurrences = _scan(root)
+    def __init__(self) -> None:
+        self._occurrences = _scan(SCENARIOS_FOLDER)
 
     @classmethod
-    def for_root(cls, root: str) -> 'SubjectsMap':
-        key = os.path.abspath(root)
-        if key not in cls._cache:
-            cls._cache[key] = cls(key)
-        return cls._cache[key]
+    def get(cls) -> 'SubjectsMap':
+        if cls._cache is None:
+            cls._cache = cls()
+        return cls._cache
 
     @classmethod
     def clear_cache(cls) -> None:
-        """Drop the cached maps (used by tests)."""
-        cls._cache.clear()
+        cls._cache = None
 
     def find_duplicate_original(self, filename: str, subject: Subject) -> Optional[Occurrence]:
-        """Return the original occurrence if `subject` in `filename` duplicates it."""
-        # _scan indexes only literal comparable subjects, anything else is
-        # simply not found below
+        """
+        Return the first occurrence of subject if the scenario in filename is not the first one
+        """
         if subject.value is None:
             return None
 
         occurrences = self._occurrences.get(subject.value, [])
-        current = os.path.abspath(filename)
+        current = os.path.relpath(filename)
 
-        # A file is one scenario: vedro collects scenarios from the module
-        # namespace, so of several `Scenario` classes only the last one runs.
-        # Not in the map means the file on disk differs from the tree flake8
-        # parsed (stdin, or an unsaved editor buffer) - nothing to compare with.
+        # vedro runs only the last Scenario of a module, so a file is one scenario.
+        # Not found: file is outside ./scenarios or differs from the one on disk
         if all(occurrence.path != current for occurrence in occurrences):
             return None
         if occurrences[0].path == current:
@@ -85,7 +74,6 @@ def _scan(root: str) -> Dict[str, List[Occurrence]]:
     result: Dict[str, List[Occurrence]] = {}
 
     for dirpath, dirnames, filenames in os.walk(root):
-        # prune in place so os.walk does not descend into them
         dirnames[:] = [d for d in dirnames if d not in PRUNED_DIRS and not d.startswith('.')]
         for name in filenames:
             if not name.endswith('.py'):
@@ -108,7 +96,6 @@ def _subjects_in_file(path: str) -> List[Subject]:
 
     found = []
     for class_node in _find_scenario_nodes(tree):
-        # only the first subject counts, the rest are VDR106's business
         subject = ScenarioHelper().get_subject(class_node)
         if subject is not None and subject.value is not None and is_comparable_subject(subject.value):
             found.append(subject)
@@ -116,12 +103,8 @@ def _subjects_in_file(path: str) -> List[Subject]:
 
 
 def _find_scenario_nodes(node: ast.AST) -> Iterator[ast.ClassDef]:
-    """Yield the same Scenario classes that ScenarioVisitor visits.
-
-    ScenarioVisitor.visit_ClassDef does not call generic_visit, so traversal
-    stops at every class: a Scenario nested in another class is never checked
-    and must not end up in the map either, or it would become an original that
-    can never be reported.
+    """
+    Return the same Scenario classes that ScenarioVisitor visits (it doesn't go inside classes)
     """
     for child in ast.iter_child_nodes(node):
         if isinstance(child, ast.ClassDef):

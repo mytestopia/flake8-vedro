@@ -9,13 +9,7 @@ from flake8_vedro.helpers.subject_scanner import SubjectsMap
 from flake8_vedro.visitors import ScenarioVisitor
 from flake8_vedro.visitors.scenario_checkers import DuplicateSubjectChecker
 
-# VDR110 compares a scenario with the other files in ./scenarios, so these
-# tests write scenarios to disk into a per-test cwd. assert_error and
-# assert_not_error cannot be used: they run the visitor on an in-memory snippet
-# without a filename, and the checker needs a filename to tell whether it is in
-# ./scenarios and to recognise its own occurrence. _assert_error and
-# _assert_not_error below mirror their contract (single error, type check,
-# exact message) on a path.
+# VDR110 reads ./scenarios from disk, so scenarios are written to files in a per-test cwd
 
 CONFIG = DefaultConfig()
 
@@ -78,7 +72,6 @@ def test_duplicated_subject(scenarios_tree):
 
 
 def test_first_subject_by_sorted_path_is_not_reported(scenarios_tree):
-    # written in reverse order: the report should not depend on it
     b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'register user')
     a = _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
     _assert_not_error(a, CONFIG)
@@ -94,8 +87,6 @@ def test_every_duplicated_subject_is_reported(scenarios_tree):
 
 
 def test_same_subject_in_one_file_is_not_reported(scenarios_tree):
-    # vedro runs only the last `Scenario` class of a module, so it is not a
-    # duplicate in the report
     path = _write(scenarios_tree / 'scenarios/a.py', '''
     class Scenario:
         subject = 'register user'
@@ -127,7 +118,6 @@ def test_same_parametrization_template(scenarios_tree):
     '{subject.name} with {error}',
 ])
 def test_subject_placeholder_is_not_compared(scenarios_tree, subject):
-    # {subject} is filled from params, so equal templates give different subjects
     paths = [_create_scenario(scenarios_tree, f'scenarios/{name}.py', subject)
              for name in ('a', 'b', 'c')]
 
@@ -165,7 +155,6 @@ def test_scenario_outside_scenarios_folder(scenarios_tree):
 
 
 def test_scenarios_folder_outside_cwd_is_not_compared(scenarios_tree):
-    # like vedro, the rule expects scenarios/ in the directory flake8 is run from
     first = _create_scenario(scenarios_tree, 'service_a/scenarios/a.py', 'register user')
     second = _create_scenario(scenarios_tree, 'service_b/scenarios/b.py', 'register user')
     _assert_not_error(first, CONFIG)
@@ -173,8 +162,6 @@ def test_scenarios_folder_outside_cwd_is_not_compared(scenarios_tree):
 
 
 def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
-    # ScenarioVisitor never checks a Scenario nested in another class, so such a
-    # scenario must not become the first occurrence: it could never be reported
     _write(scenarios_tree / 'scenarios/A_nested.py', '''
     class Outer:
         class Scenario:
@@ -187,7 +174,6 @@ def test_scenario_nested_in_class_is_not_the_first_subject(scenarios_tree):
 
 
 def test_scenario_nested_in_function_is_the_first_subject(scenarios_tree):
-    # ScenarioVisitor does check it, so it must be in the map
     nested = _write(scenarios_tree / 'scenarios/A_nested.py', '''
     def make_scenario():
         class Scenario:
@@ -200,8 +186,6 @@ def test_scenario_nested_in_function_is_the_first_subject(scenarios_tree):
 
 
 def test_other_class_attributes_do_not_hide_the_subject(scenarios_tree):
-    # a tuple target like `FIRST, SECOND = 1, 2` has no .id, it must neither
-    # break the scan nor make the scanner skip the scenario
     _write(scenarios_tree / 'scenarios/A_attributes.py', '''
     class Scenario:
         FIRST, SECOND = 1, 2
@@ -225,8 +209,6 @@ def test_file_with_syntax_error_is_skipped(scenarios_tree):
 
 
 def test_subject_changed_in_an_unsaved_file_is_skipped(scenarios_tree):
-    # flake8 can be given a tree that differs from the file on disk (stdin, an
-    # unsaved editor buffer): there is nothing reliable to compare, so be quiet
     _create_scenario(scenarios_tree, 'scenarios/a.py', 'register user')
     b = _create_scenario(scenarios_tree, 'scenarios/b.py', 'login user')
     changed = ast.parse("class Scenario:\n    subject = 'register user'\n")
