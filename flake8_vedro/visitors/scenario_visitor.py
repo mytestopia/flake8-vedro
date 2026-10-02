@@ -11,13 +11,11 @@ from flake8_vedro.visitors._visitor_with_filename import VisitorWithFilename
 class Context:
     def __init__(self, steps: List[FuncType], scenario_node: ast.ClassDef,
                  import_from_nodes: List[ast.ImportFrom],
-                 filename: str,
-                 scenarios_root: Optional[str] = None):
+                 filename: str):
         self.steps = steps
         self.scenario_node = scenario_node
         self.import_from_nodes = import_from_nodes
         self.filename = filename
-        self.scenarios_root = scenarios_root
 
 
 class ScenarioVisitor(VisitorWithFilename):
@@ -29,8 +27,6 @@ class ScenarioVisitor(VisitorWithFilename):
                  filename: Optional[str] = None) -> None:
         super().__init__(config, filename)
         self.import_from_nodes = []
-        # the same for every scenario in the file, so resolved once
-        self.scenarios_root = ScenarioHelper().get_scenarios_root(filename) if filename else None
 
     @property
     def config(self):
@@ -62,8 +58,7 @@ class ScenarioVisitor(VisitorWithFilename):
             context = Context(steps=ScenarioHelper().get_all_steps(node),
                               scenario_node=node,
                               import_from_nodes=self.import_from_nodes,
-                              filename=self.filename,
-                              scenarios_root=self.scenarios_root)
+                              filename=self.filename)
             try:
                 for checker in self.steps_checkers:
                     self.errors.extend(checker.check_steps(context, self.config))

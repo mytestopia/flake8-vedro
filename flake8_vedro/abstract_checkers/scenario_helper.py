@@ -1,5 +1,4 @@
 import ast
-import os
 import pathlib
 from typing import List, NamedTuple, Optional
 
@@ -84,9 +83,3 @@ class ScenarioHelper:
             if parent.name == folder:
                 return True
         return False
-
-    def get_scenarios_root(self, filename: str) -> Optional[str]:
-        """Return the outermost "scenarios" directory containing `filename`."""
-        path = pathlib.Path(os.path.abspath(filename))
-        roots = [str(parent) for parent in path.parents if parent.name == SCENARIOS_FOLDER]
-        return roots[-1] if roots else None

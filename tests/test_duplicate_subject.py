@@ -9,12 +9,13 @@ from flake8_vedro.helpers.subject_scanner import SubjectsMap
 from flake8_vedro.visitors import ScenarioVisitor
 from flake8_vedro.visitors.scenario_checkers import DuplicateSubjectChecker
 
-# VDR110 compares a scenario with the other files in its scenarios/ folder, so
-# these tests write scenarios to disk into a per-test cwd. assert_error and
+# VDR110 compares a scenario with the other files in ./scenarios, so these
+# tests write scenarios to disk into a per-test cwd. assert_error and
 # assert_not_error cannot be used: they run the visitor on an in-memory snippet
-# without a filename, and the checker needs a filename to find its folder and
-# to recognise its own occurrence. _assert_error and _assert_not_error below
-# mirror their contract (single error, type check, exact message) on a path.
+# without a filename, and the checker needs a filename to tell whether it is in
+# ./scenarios and to recognise its own occurrence. _assert_error and
+# _assert_not_error below mirror their contract (single error, type check,
+# exact message) on a path.
 
 CONFIG = DefaultConfig()
 
@@ -163,9 +164,10 @@ def test_scenario_outside_scenarios_folder(scenarios_tree):
     _assert_not_error(outside, CONFIG)
 
 
-def test_another_scenarios_folder_is_another_namespace(scenarios_tree):
+def test_scenarios_folder_outside_cwd_is_not_compared(scenarios_tree):
+    # like vedro, the rule expects scenarios/ in the directory flake8 is run from
     first = _create_scenario(scenarios_tree, 'service_a/scenarios/a.py', 'register user')
-    second = _create_scenario(scenarios_tree, 'service_b/scenarios/a.py', 'register user')
+    second = _create_scenario(scenarios_tree, 'service_b/scenarios/b.py', 'register user')
     _assert_not_error(first, CONFIG)
     _assert_not_error(second, CONFIG)
 
