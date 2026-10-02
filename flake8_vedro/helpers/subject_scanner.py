@@ -38,12 +38,11 @@ class SubjectsMap:
     _cache: Optional['SubjectsMap'] = None
 
     def __init__(self, root: str) -> None:
-        self.root = root
         self._occurrences = _scan(root)
 
     @classmethod
     def for_root(cls, root: str) -> 'SubjectsMap':
-        if cls._cache is None or cls._cache.root != root:
+        if cls._cache is None:
             cls._cache = cls(root)
         return cls._cache
 
