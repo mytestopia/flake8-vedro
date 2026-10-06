@@ -1,4 +1,5 @@
 from .decorator_checker import VedroOnlyChecker
+from .duplicate_subject_checker import DuplicateSubjectChecker
 from .location_checker import LocationChecker
 from .parametrization_call_checker import ParametrizationCallChecker
 from .parametrization_limit_checker import ParametrizationLimitChecker

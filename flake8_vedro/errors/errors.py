@@ -50,6 +50,11 @@ class ExceedMaxParamsCount(Error):
     message = 'exceeded max parameters in vedro.params: {current} > {max}'
 
 
+class SubjectDuplicatedAcrossScenarios(Error):
+    code = 'VDR110'
+    message = 'subject is already used in another scenario: {first_file}:{first_lineno}'
+
+
 # Step errors
 
 class StepInvalidName(Error):

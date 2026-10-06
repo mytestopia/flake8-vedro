@@ -43,6 +43,7 @@ allow_ifs_in_steps = init,given  # VDR314
 7. [VDR107. Subject is not parameterized*](./flake8_vedro/rules/VDR107.md)
 8. [VDR108. Calling functions in parametrization](./flake8_vedro/rules/VDR108.md)
 9. [VDR109. Limit the amount of parameters in a parametrized scenario](./flake8_vedro/rules/VDR109.md)
+10. [VDR110. Scenario subject should be unique*](./flake8_vedro/rules/VDR110.md)
 
 
 ###  Scenario Steps Rules

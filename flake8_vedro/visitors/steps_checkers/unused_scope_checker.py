@@ -1,4 +1,3 @@
-import ast
 import re
 from typing import List
 
@@ -21,10 +20,10 @@ class UnusedScopeVariablesChecker(StepsChecker):
         subject = self.get_subject(context.scenario_node)
 
         # It is treated as a mistake in VDR104, VDR105
-        if not (subject and isinstance(subject.value, ast.Constant)):
+        if not (subject and subject.value is not None):
             return set()
 
-        matches = re.findall(r'{(\w+)(?:\.\w+)*}', subject.value.value)
+        matches = re.findall(r'{(\w+)(?:\.\w+)*}', subject.value)
         return set(matches)
 
     @staticmethod

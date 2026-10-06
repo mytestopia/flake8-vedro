@@ -1,8 +1,15 @@
 import ast
 import pathlib
-from typing import List, Optional
+from typing import List, NamedTuple, Optional
 
 SCENARIOS_FOLDER = 'scenarios'
+SCENARIO_CLASS_NAME = 'Scenario'
+
+
+class Subject(NamedTuple):
+    value: Optional[str]  # None if subject is not a string literal
+    lineno: int
+    col_offset: int
 
 
 class ScenarioHelper:
@@ -20,14 +27,23 @@ class ScenarioHelper:
             if isinstance(element, ast.FunctionDef) and element.name == '__init__':
                 return element
 
-    def get_subjects(self, node: ast.ClassDef) -> List[ast.Assign]:
+    def get_subjects(self, node: ast.ClassDef) -> List[Subject]:
         subjects = []
         for element in node.body:
-            if isinstance(element, ast.Assign) and element.targets[0].id == 'subject':
-                subjects.append(element)
+            if not isinstance(element, ast.Assign):
+                continue
+            target = element.targets[0]
+            if not isinstance(target, ast.Name) or target.id != 'subject':
+                continue
+
+            value = element.value
+            is_literal = isinstance(value, ast.Constant) and isinstance(value.value, str)
+            subjects.append(Subject(value=value.value if is_literal else None,
+                                    lineno=element.lineno,
+                                    col_offset=element.col_offset))
         return subjects
 
-    def get_subject(self, node: ast.ClassDef) -> Optional[ast.Assign]:
+    def get_subject(self, node: ast.ClassDef) -> Optional[Subject]:
         subjects = self.get_subjects(node)
         return subjects[0] if subjects else None
 

@@ -1,6 +1,7 @@
 from .context_checkers import ContextAssertChecker
 from .context_visitor import ContextVisitor
 from .scenario_checkers import (
+    DuplicateSubjectChecker,
     LocationChecker,
     ParametrizationCallChecker,
     ParametrizationLimitChecker,

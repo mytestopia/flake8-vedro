@@ -50,3 +50,16 @@ def test_vedro_scenario_subject_duplicate():
         def when(): pass
     """
     assert_error(ScenarioVisitor, code, SubjectDuplicated)
+
+
+def test_vedro_scenario_subject_duplicate_after_tuple_assignment():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_scenario_checker(SingleSubjectChecker)
+    code = """
+    class Scenario:
+        FIRST, SECOND = 1, 2
+        subject = 'string'
+        subject = 'another string'
+        def when(): pass
+    """
+    assert_error(ScenarioVisitor, code, SubjectDuplicated)

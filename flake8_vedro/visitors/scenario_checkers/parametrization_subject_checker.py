@@ -18,8 +18,10 @@ class ParametrizationSubjectChecker(ScenarioChecker):
             params_decorator = self.get_params_decorators(init_node)
 
             if len(params_decorator) > 1:
-                subject_node = self.get_subject(context.scenario_node)
+                subject = self.get_subject(context.scenario_node)
+                if subject is None or subject.value is None:
+                    return []
                 pattern = re.compile(r'^.*{.+}.*$')
-                if not pattern.match(subject_node.value.value):
-                    return [SubjectIsNotParametrized(subject_node.lineno, subject_node.col_offset)]
+                if not pattern.match(subject.value):
+                    return [SubjectIsNotParametrized(subject.lineno, subject.col_offset)]
         return []
