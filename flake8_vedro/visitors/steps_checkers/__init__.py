@@ -1,3 +1,4 @@
+from .api_response_asserts_checker import ApiResponseAssertsChecker
 from .assert_checker import AssertChecker
 from .branching_checker import BranchingChecker
 from .interfaces_checker import InterfacesUsageChecker

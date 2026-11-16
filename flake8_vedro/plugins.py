@@ -102,6 +102,12 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             parse_from_config=True,
             help='List of steps where branching is allowed: init, given, when, then (rule VDR314)',
         )
+        option_manager.add_option(
+            '--api-interfaces-list',
+            comma_separated_list=True,
+            parse_from_config=True,
+            help='List of API interfaces whose responses must have a status code assertion (rule VDR315)',
+        )
 
     @classmethod
     def parse_options_to_config(
@@ -115,7 +121,8 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allow_partial_redefinitions_in_one_step=str_to_bool(options.allow_partial_redefinitions_in_one_step),
             allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes),
             ignore_variables_pattern=cls.parse_ignore_variables_pattern(options.ignore_variables_pattern),
-            allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps)
+            allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps),
+            api_interfaces_list=options.api_interfaces_list
         )
 
     @classmethod

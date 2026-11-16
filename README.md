@@ -29,6 +29,7 @@ allow_partial_redefinitions_in_one_step = True # VDR312
 allow_unused_with_block_attributes = False  # VDR313
 ignore_variables_pattern = ^(log|history).*  # VDR313
 allow_ifs_in_steps = init,given  # VDR314
+api_interfaces_list = ChatApi,SmthApi  # VDR315
 ```
 
 ## Rules
@@ -62,6 +63,7 @@ allow_ifs_in_steps = init,given  # VDR314
 13. [VDR312. Scope variables should not be partially redefined](./flake8_vedro/rules/VDR312.md)
 14. [VDR313. Scope variables should not be left unused](./flake8_vedro/rules/VDR313.md)
 15. [VDR314. Steps should not have branching](./flake8_vedro/rules/VDR314.md)
+16. [VDR315. API response status code should be asserted](./flake8_vedro/rules/VDR315.md)
 
 
 ###  Contexts Rules

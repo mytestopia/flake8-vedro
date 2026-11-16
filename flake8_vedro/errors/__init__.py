@@ -1,4 +1,5 @@
 from .errors import (
+    ApiResponseStatusNotAsserted,
     ContextCallInParams,
     ContextWithoutAssert,
     DecoratorVedroOnly,

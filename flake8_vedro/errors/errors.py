@@ -136,6 +136,11 @@ class StepHasBranching(Error):
     message = 'step "{step_name}" should not have branching'
 
 
+class ApiResponseStatusNotAsserted(Error):
+    code = 'VDR315'
+    message = 'API response "{name}" status code should be asserted'
+
+
 class ContextWithoutAssert(Error):
     code = 'VDR400'
     message = 'context "{context_name}" does not have an assert'
