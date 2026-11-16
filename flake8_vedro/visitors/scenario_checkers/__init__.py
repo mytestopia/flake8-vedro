@@ -5,4 +5,5 @@ from .parametrization_call_checker import ParametrizationCallChecker
 from .parametrization_limit_checker import ParametrizationLimitChecker
 from .parametrization_subject_checker import ParametrizationSubjectChecker
 from .parent_checker import ParentChecker
+from .skip_ticket_checker import SkipTicketChecker
 from .subject_checker import SingleSubjectChecker, SubjectEmptyChecker

@@ -8,6 +8,7 @@ from .scenario_checkers import (
     ParametrizationSubjectChecker,
     ParentChecker,
     SingleSubjectChecker,
+    SkipTicketChecker,
     SubjectEmptyChecker,
     VedroOnlyChecker,
 )

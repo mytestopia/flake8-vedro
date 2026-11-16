@@ -29,6 +29,8 @@ allow_partial_redefinitions_in_one_step = True # VDR312
 allow_unused_with_block_attributes = False  # VDR313
 ignore_variables_pattern = ^(log|history).*  # VDR313
 allow_ifs_in_steps = init,given  # VDR314
+require_skip_ticket = true  # VDR111
+skip_ticket_pattern = [A-Z][A-Z0-9]+-\d+  # VDR111
 ```
 
 ## Rules
@@ -44,6 +46,7 @@ allow_ifs_in_steps = init,given  # VDR314
 8. [VDR108. Calling functions in parametrization](./flake8_vedro/rules/VDR108.md)
 9. [VDR109. Limit the amount of parameters in a parametrized scenario](./flake8_vedro/rules/VDR109.md)
 10. [VDR110. Scenario subject should be unique*](./flake8_vedro/rules/VDR110.md)
+11. [VDR111. Skipped scenarios should include a ticket in the reason](./flake8_vedro/rules/VDR111.md)
 
 
 ###  Scenario Steps Rules

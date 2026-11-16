@@ -9,6 +9,7 @@ from .errors import (
     ScopeVarIsNotUsed,
     ScopeVarIsPartiallyRedefined,
     ScopeVarIsRedefined,
+    SkipReasonTicketMissing,
     StepAssertHasComparisonWithoutAssert,
     StepAssertHasUselessAssert,
     StepAssertWithoutAssert,

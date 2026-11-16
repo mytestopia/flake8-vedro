@@ -55,6 +55,11 @@ class SubjectDuplicatedAcrossScenarios(Error):
     message = 'subject is already used in another scenario: {first_file}:{first_lineno}'
 
 
+class SkipReasonTicketMissing(Error):
+    code = 'VDR111'
+    message = 'scenario skip reason should contain a ticket'
+
+
 # Step errors
 
 class StepInvalidName(Error):
